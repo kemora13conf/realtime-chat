@@ -1,13 +1,6 @@
 import Users from "../Models/Users.js";
-import jwt from 'jsonwebtoken'
-
-const answerObject = (type, message, data=null) => {
-    return {
-        type: type,
-        message: message,
-        data: data,
-    };
-};
+import jwt from 'jsonwebtoken';
+import { answerObject } from "../Helpers/utils.js";
 
 const register = async (req, res) => {
     if(
@@ -47,4 +40,33 @@ const login = async (req, res) => {
     }   
 }
 
-export { answerObject, register, login }
+async function requireSingin(req, res, next) {
+    try {
+        const Authorization = req.headers.authorization;
+        if (Authorization) {
+            const token = Authorization.split(" ")[1];
+            const secretKey = process.env.JWT_SECRET;
+
+            const verificationResponse = jwt.verify(token, secretKey);
+            const userId = verificationResponse._id;
+            
+            const foundUser = await Users.findOne({ _id: userId });
+            foundUser.password = undefined;
+            if (foundUser) {
+                req.user = foundUser;
+                next();
+            } else {
+                res.status(401).json(answerObject('error', "Wrong authentication token"));
+            }
+        } else {
+            res.status(404).json(answerObject('error', "Authentication token missing"));
+        }
+    } catch (error) {
+        console.log(error.message)
+      res.status(401).json({
+        error: "Wrong authentication token",
+      });
+    }
+}
+
+export { register, login, requireSingin }

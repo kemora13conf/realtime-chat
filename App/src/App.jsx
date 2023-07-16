@@ -10,11 +10,15 @@ import Home from './Components/Home'
 
 const AppContext = createContext()
 const AppProvider = (props)=>{
+  const [ openedChat, setOpenedChat ] = useState(null)
+
   const state = {
     isAuth: props.isAuth,
     setIsAuth: props.setIsAuth,
     currentUser: props.currentUser,
-    setCurrentUser: props.setCurrentUser
+    setCurrentUser: props.setCurrentUser,
+    openedChat,
+    setOpenedChat
   }
   return (
     <AppContext.Provider value={state}>
@@ -40,6 +44,8 @@ function App() {
       if(data.type === 'success'){
         setIsAuth(true)
         setCurrentUser(data.data)
+      }else{
+        setCurrentUser({})
       }
       setLoaded(true)
     }).catch(err => {

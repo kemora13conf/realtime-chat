@@ -45,9 +45,11 @@ app.get('/', (req, res) => {
 
 // Importing the routes
 import authRouter from './Routes/Auth.js';
+import Users from './Routes/Users.js'
 
 // Setting up the routes
 app.use('/api/auth', authRouter);
+app.use('/api/users', Users);
 
 app.listen(3000, () => {
     console.log('Server is running on PORT http://localhost:3000');

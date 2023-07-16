@@ -1,14 +1,17 @@
 import { motion } from "framer-motion"
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useForm } from 'react-hook-form';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
+import Loading from "./Loading";
 
 const Login = function () {
 
     const { isAuth, setIsAuth } = useContext(AppContext)
     const { register, handleSubmit} = useForm();
     const [ errors, setErrors ] = useState({});
+    const [ loaded, setLoaded ] = useState(false)
+    const navigate = useNavigate()
     const file = useRef(null);
     const image = useRef(null);
     
@@ -36,26 +39,42 @@ const Login = function () {
         .then(data => {
             var expirationDate = new Date();
             expirationDate.setDate(expirationDate.getDate() + 3);
-            document.cookie = `jwt=${encodeURIComponent(data.data)};expires=expirationDate;path=/`;
+            document.cookie = `jwt=${encodeURIComponent(data.data)};expires=${expirationDate};path=/`;
             setIsAuth(true);
+            navigate('/')
         })
         .catch(error => {
             console.log(error);
         });
     }
+    if(isAuth){
+        navigate('/')
+    }
+    useEffect(()=>{
+        setLoaded(true)
+    })
+    if(!loaded){
+        return <Loading />
+    }
 
     return (
-        <motion.div className="w-full min-h-screen flex flex-col justify-center items-center bg-primary">
-            <form 
+        <motion.div className="relative w-full min-h-screen flex flex-col justify-center items-center bg-primary-500">
+            <motion.form 
+                initial={{opacity: 0, scale: 0.5}}
+                animate={{opacity: 1, scale: 1}}
+                transition={{
+                    type: 'tween',
+                    duration: 0.3
+                }} 
                 onSubmit={ handleSubmit(onSubmit) }
-                className="flex flex-col gap-2 max-w-md w-full h-fit p-4 bg-secondary rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold text-center text-tertiary">Login</h1>
+                className="absolute flex flex-col gap-3 max-w-md w-full h-fit p-4 px-8 bg-secondary-500 rounded-lg shadow-md">
+                <h1 className="text-2xl font-bold text-center text-tertiary-500">Login</h1>
                 <div className="flex flex-col gap-2 ">
-                    <label htmlFor="username" className="text-quaternary">Username</label>
+                    <label htmlFor="username" className="text-quaternary-500">Username</label>
                     <input 
                         { ...register('username', { reauired: true }) } 
                         placeholder="Username"
-                        className="bg-tertiary outline-none px-5 py-3 rounded-md shadow-lg text-primary placeholder:text-secondary" 
+                        className="bg-tertiary-500 outline-none px-5 py-3 rounded-md shadow-lg text-primary-500 placeholder:text-secondary-500" 
                     />
                     {
                         errors.username 
@@ -63,12 +82,12 @@ const Login = function () {
                     }
                 </div>
                 <div className="flex flex-col gap-2 ">
-                    <label htmlFor="password" className="text-quaternary">password</label>
+                    <label htmlFor="password" className="text-quaternary-500">password</label>
                     <input 
                         type="password"
                         { ...register('password', { reauired: true }) } 
                         placeholder="password"
-                        className="bg-tertiary outline-none px-5 py-3 rounded-md shadow-lg text-primary placeholder:text-secondary" 
+                        className="bg-tertiary-500 outline-none px-5 py-3 rounded-md shadow-lg text-primary-500 placeholder:text-secondary-500" 
                     />
                     {
                         errors.password 
@@ -77,12 +96,12 @@ const Login = function () {
                 </div>
                 <button 
                     type="submit"
-                    className="px-5 py-3 rounded-md cursor-pointer bg-primary text-tertiary">
+                    className="px-5 py-3 mt-4 rounded-md cursor-pointer bg-primary-500 text-tertiary-500">
                     Login
                 </button>
                 <Link to='/register' className="text-center text-blue-500"> Register </Link>
                 
-            </form>
+            </motion.form>
         </motion.div>
     )
 }

@@ -43,17 +43,17 @@ const Register = function () {
     }
 
     return (
-        <motion.div className="w-full min-h-screen flex flex-col justify-center items-center bg-primary">
+        <motion.div className="w-full min-h-screen flex flex-col justify-center items-center bg-primary-500">
             <form 
                 onSubmit={ handleSubmit(onSubmit) }
-                className="flex flex-col gap-2 max-w-md w-full h-fit p-4 bg-secondary rounded-lg shadow-md">
-                <h1 className="text-2xl font-bold text-center text-tertiary">Register</h1>
+                className="flex flex-col gap-2 max-w-md w-full h-fit p-4 bg-secondary-500 rounded-lg shadow-md">
+                <h1 className="text-2xl font-bold text-center text-tertiary-500">Register</h1>
                 <div className="flex flex-col gap-2 ">
-                    <label htmlFor="username" className="text-quaternary">Username</label>
+                    <label htmlFor="username" className="text-quaternary-500">Username</label>
                     <input 
                         { ...register('username', { reauired: true }) } 
                         placeholder="Username"
-                        className="bg-tertiary outline-none px-5 py-3 rounded-md shadow-lg text-primary placeholder:text-secondary" 
+                        className="bg-tertiary-500 outline-none px-5 py-3 rounded-md shadow-lg text-primary-500 placeholder:text-secondary-500" 
                     />
                     {
                         errors.username 
@@ -61,12 +61,12 @@ const Register = function () {
                     }
                 </div>
                 <div className="flex flex-col gap-2 ">
-                    <label htmlFor="email" className="text-quaternary">email</label>
+                    <label htmlFor="email" className="text-quaternary-500">email</label>
                     <input 
                         { ...register('email', { reauired: true }) } 
                         type="email"
                         placeholder="email"
-                        className="bg-tertiary outline-none px-5 py-3 rounded-md shadow-lg text-primary placeholder:text-secondary" 
+                        className="bg-tertiary-500 outline-none px-5 py-3 rounded-md shadow-lg text-primary-500 placeholder:text-secondary-500" 
                     />
                     {
                         errors.email 
@@ -74,12 +74,12 @@ const Register = function () {
                     }
                 </div>
                 <div className="flex flex-col gap-2 ">
-                    <label htmlFor="password" className="text-quaternary">password</label>
+                    <label htmlFor="password" className="text-quaternary-500">password</label>
                     <input 
                         type="password"
                         { ...register('password', { reauired: true }) } 
                         placeholder="password"
-                        className="bg-tertiary outline-none px-5 py-3 rounded-md shadow-lg text-primary placeholder:text-secondary" 
+                        className="bg-tertiary-500 outline-none px-5 py-3 rounded-md shadow-lg text-primary-500 placeholder:text-secondary-500" 
                     />
                     {
                         errors.password 
@@ -87,12 +87,12 @@ const Register = function () {
                     }
                 </div>
                 <div className="flex flex-col gap-2 ">
-                    <label htmlFor="confirm_pwd" className="text-quaternary">Confirm Password</label>
+                    <label htmlFor="confirm_pwd" className="text-quaternary-500">Confirm Password</label>
                     <input 
                         type="password"
                         { ...register('passwordConfirmation', { reauired: true }) } 
                         placeholder="Confirm Password"
-                        className="bg-tertiary outline-none px-5 py-3 rounded-md shadow-lg text-primary placeholder:text-secondary" 
+                        className="bg-tertiary-500 outline-none px-5 py-3 rounded-md shadow-lg text-primary-500 placeholder:text-secondary-500" 
                     />
                     {
                         errors.confirm_pwd 
@@ -110,11 +110,11 @@ const Register = function () {
                         alt="Import image" 
                         ref={image}
                         onClick={() => file.current.click()}
-                        className="w-full max-h-32 h-auto p-2 object-cover rounded-md cursor-pointer transition-all border-dashed border-2 border-quaternary hover:border-solid hover:border-tertiary " />
+                        className="w-full max-h-32 h-auto p-2 object-cover rounded-md cursor-pointer transition-all border-dashed border-2 border-quaternary-500 hover:border-solid hover:border-tertiary-500 " />
                 </div>
                 <button 
                     type="submit"
-                    className="px-5 py-3 rounded-md cursor-pointer bg-primary text-tertiary">
+                    className="px-5 py-3 rounded-md cursor-pointer bg-primary-500 text-tertiary-500">
                     Register
                 </button>
                 <Link to='/login' className="text-center text-blue-500"> Login </Link>

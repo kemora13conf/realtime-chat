@@ -43,7 +43,7 @@ usersSchema.pre('save', function(next) {
     }
     next();
   });
-usersSchema.methods = {
+usersSchema.methods = { 
     // Method to decrypt the password
     decryptPassword: function() {
         const bytes = CryptoJS.AES.decrypt(this.password, process.env.JWT_SECRET);
