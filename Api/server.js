@@ -4,12 +4,67 @@ import mongoose from 'mongoose';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { config } from 'dotenv';
+import { Server } from 'socket.io';
+import http from 'http';
+import MessagesModel from './Models/Messages.js';
+import UsersModel from './Models/Users.js'
 
 // Setting up the config
 config();
 
 // Setting up the express app
 const app = express();
+const server = http.createServer(app);
+
+// Setting up the socket.io
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CORS_ORIGIN,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  },
+});
+
+let users = {}
+
+function getSocketId(userId){
+  const keys = Object.keys(users)
+  console.log('users ', users)
+  keys.map((key,index) => {
+    console.log(key, ' ', userId)
+    if (key == userId) {
+      return users[index]
+    }
+  })
+}
+
+io.on('connection', (socket) => {
+  // console.log('A user connected ', socket.id);
+  socket.on('connection-success', async (userId) => {
+    try {
+      const user = await UsersModel
+                    .findOneAndUpdate(
+                      { _id: userId}, 
+                      {$set : { socket: socket.id}}, 
+                      { new: true }
+                    );
+    } catch (error) {
+      console.log(error.message)
+    }
+  })
+  
+  socket.on('message', async (userId) => {
+    try {
+      const user = await UsersModel.findOne({ _id: userId });
+      io.to(user.socket).emit('message');
+    } catch (error) {
+      console.log(error.message)
+    }
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('A user disconnected ', socket.id);
+  });
+});
 
 // Connecting to the database
 console.log(process.env.MONGO_DB);
@@ -46,11 +101,14 @@ app.get('/', (req, res) => {
 // Importing the routes
 import authRouter from './Routes/Auth.js';
 import Users from './Routes/Users.js'
+import Messages from './Routes/Messages.js'
+import { getRandomValues } from 'crypto';
 
 // Setting up the routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', Users);
+app.use('/api/messages', Messages);
 
-app.listen(3000, () => {
+server.listen(3000, () => {
     console.log('Server is running on PORT http://localhost:3000');
 });

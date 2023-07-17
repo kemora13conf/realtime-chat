@@ -17,8 +17,8 @@ const AppProvider = (props)=>{
     setIsAuth: props.setIsAuth,
     currentUser: props.currentUser,
     setCurrentUser: props.setCurrentUser,
-    openedChat,
-    setOpenedChat
+    openedChat: openedChat,
+    setOpenedChat: setOpenedChat
   }
   return (
     <AppContext.Provider value={state}>

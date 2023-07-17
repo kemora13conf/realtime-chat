@@ -8,7 +8,9 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
       // Define the filename for the uploaded file
       const ext = file.mimetype.split('/')[1];
-      cb(null, Date.now() + '-' + file.originalname);
+      const name = Date.now() + '-' + file.originalname
+      cb(null, name);
+      if(name) req.body.profilePicture = name;
     }
   });
   

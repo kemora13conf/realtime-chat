@@ -8,10 +8,9 @@ export default function User({ user, handleClick }) {
         <div 
             onClick={()=>{
                 setOpenedChat(user._id)
-                console.log('clicked')
             }}
             className="flex gap-2 p-2 rounded-xl cursor-pointer transition-all hover:shadow-card hover:bg-secondary-600 ">
-            <img src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${currentUser.profilePicture}`}
+            <img src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${user.profilePicture}`}
                 className="w-12 h-12 rounded-full bg-quaternary-500 object-cover object-center shadow-profile" />
             <div className="flex flex-col">
                 <div className="font-bold text-quaternary-500">

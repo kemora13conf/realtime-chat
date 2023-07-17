@@ -1,8 +1,8 @@
 import { useContext, useState } from "react"
 import { AppContext } from "../App"
 import SideBar from "./SideBar"
-import Chat from "./Chat"
 import { motion } from "framer-motion" 
+import ChatContainer from "./ChatContainer"
 
 export default function Home() {
     // get the current user from the context
@@ -19,7 +19,7 @@ export default function Home() {
                 }}  
                 className="w-full max-w-[900px] min-h-[600px] bg-secondary-600 rounded-3xl shadow-profile overflow-hidden flex">
                 <SideBar />
-                <Chat id={openedChat} />
+                <ChatContainer id={openedChat} />
                 {/* id={'64aad0f6e3037ab7d995f252'} */}
             </motion.div>
         </div>

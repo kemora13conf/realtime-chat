@@ -44,9 +44,15 @@ const Register = function () {
 
     return (
         <motion.div className="w-full min-h-screen flex flex-col justify-center items-center bg-primary-500">
-            <form 
+            <motion.form
+                initial={{opacity: 0, scale: 0.5}}
+                animate={{opacity: 1, scale: 1}}
+                transition={{
+                    type: 'tween',
+                    duration: 0.3
+                }} 
                 onSubmit={ handleSubmit(onSubmit) }
-                className="flex flex-col gap-2 max-w-md w-full h-fit p-4 bg-secondary-500 rounded-lg shadow-md">
+                className="flex flex-col gap-3 max-w-md w-full h-fit p-4 px-8 bg-secondary-500 rounded-lg shadow-md">
                 <h1 className="text-2xl font-bold text-center text-tertiary-500">Register</h1>
                 <div className="flex flex-col gap-2 ">
                     <label htmlFor="username" className="text-quaternary-500">Username</label>
@@ -118,7 +124,7 @@ const Register = function () {
                     Register
                 </button>
                 <Link to='/login' className="text-center text-blue-500"> Login </Link>
-            </form>
+            </motion.form>
         </motion.div>
     )
 }
