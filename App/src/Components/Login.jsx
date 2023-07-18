@@ -7,7 +7,7 @@ import Loading from "./Loading";
 
 const Login = function () {
 
-    const { isAuth, setIsAuth } = useContext(AppContext)
+    const { isAuth, setIsAuth, socket } = useContext(AppContext)
     const { register, handleSubmit} = useForm();
     const [ errors, setErrors ] = useState({});
     const [ loaded, setLoaded ] = useState(false)
@@ -41,13 +41,13 @@ const Login = function () {
             expirationDate.setDate(expirationDate.getDate() + 3);
             document.cookie = `jwt=${encodeURIComponent(data.data)};expires=${expirationDate};path=/`;
             setIsAuth(true);
-            navigate('/')
         })
         .catch(error => {
             console.log(error);
         });
     }
     if(isAuth){
+        console.log('isAuth: ',isAuth)
         navigate('/')
     }
     useEffect(()=>{

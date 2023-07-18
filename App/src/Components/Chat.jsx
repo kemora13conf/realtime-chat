@@ -3,19 +3,11 @@ import ChatHeader from "./ChatHeader";
 import MessageForm from "./MessageForm";
 import { AppContext } from "../App";
 import { useContext, useEffect, useState } from "react";
-import { Manager } from "socket.io-client";
-
-const manager = new Manager(import.meta.env.VITE_SOCKET_URL)
 
 export default function Chat({ user }) {
-    const { currentUser, openedChat } = useContext(AppContext)
+    const { currentUser, openedChat, socket } = useContext(AppContext)
     const [ messages, setMessages ] = useState([])
-    const socket = manager.socket('/');
-    try {
-        manager.open();
-    } catch (error) {
-        console.log(error)
-    }
+
     function getMessages (){
         fetch(`${import.meta.env.VITE_API}/messages/${currentUser._id}/${openedChat}`)
         .then(res => res.json())
@@ -51,7 +43,7 @@ export default function Chat({ user }) {
                     }
                 </div>
             </div>
-            <MessageForm user={user} socket={socket} setMessages={setMessages} />
+            <MessageForm user={user} setMessages={setMessages} />
         </>
     )
 }

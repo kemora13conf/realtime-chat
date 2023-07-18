@@ -1,10 +1,12 @@
 import { motion } from "framer-motion"
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { Link } from "react-router-dom";
+import { AppContext } from "../App";
 
 
 const Register = function () {
+    const { isAuth, socket } = useContext(AppContext)
     const { register, handleSubmit} = useForm();
     const [ errors, setErrors ] = useState({});
     const file = useRef(null);
@@ -36,10 +38,15 @@ const Register = function () {
         .then(response => response.json())
         .then(data => {
             console.log(data);
+            socket.emit('new-user', true)
         })
         .catch(error => {
             console.log(error);
         });
+    }
+    if(isAuth){
+        console.log('isAuth: ',isAuth)
+        navigate('/')
     }
 
     return (

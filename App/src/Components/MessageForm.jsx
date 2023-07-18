@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../App"
 
-export default function MessageForm({ user, socket, setMessages }){
-    const { currentUser } = useContext(AppContext)
+export default function MessageForm({ user, setMessages }){
+    const { currentUser, socket } = useContext(AppContext)
     const [ msg, setMsg ] = useState('')
     function handleSubmit(e){
         e.preventDefault()

@@ -4,16 +4,19 @@ import User from "./User"
 import CurrentUser from "./CurrentUserCard"
 
 export default function SideBar({ openChat }) {
-    const { currentUser, setOpenedChat } = useContext(AppContext)
+    const { currentUser, setOpenedChat, socket } = useContext(AppContext)
     const [ users, setUsers ] = useState([])
-
+    const [ userAvailable, setUserAvailable ] = useState(false)
+    socket.on('new-user', ()=>{
+        setUserAvailable(prv => !prv)
+    })
     // fetch users from `${import.meta.env.VITE_API_URL}/users`
     // setUsers with the response
     useEffect(() => {
         fetch(`${import.meta.env.VITE_API}/users`)
             .then(res => res.json())
             .then(data => setUsers(data))
-    }, [])
+    }, [userAvailable])
 
     return (
         

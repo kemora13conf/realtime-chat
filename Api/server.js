@@ -60,9 +60,14 @@ io.on('connection', (socket) => {
       console.log(error.message)
     }
   });
+  socket.on('new-user', ()=>{
+    console.log("new user emitted")
+    socket.broadcast.emit('new-user', true)
+  })
   
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log('A user disconnected ', socket.id);
+    await UsersModel.findOneAndUpdate({ socket: socket.id },{ $set: { socket: '' } },{ new: true })
   });
 });
 
