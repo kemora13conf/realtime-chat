@@ -21,6 +21,7 @@ const AppProvider = (props)=>{
   }
   const [ openedChat, setOpenedChat ] = useState(null)
   const [ socket, setSocket ] = useState(socketObj)
+  const [ isDark, setIsDark ] = useState(false)
 
   const state = {
     isAuth: props.isAuth,
@@ -30,7 +31,9 @@ const AppProvider = (props)=>{
     openedChat: openedChat,
     setOpenedChat: setOpenedChat,
     socket: socket,
-    setSocket: setSocket
+    setSocket: setSocket,
+    isDark: isDark,
+    setIsDark: setIsDark
   }
   useEffect(()=>{
     setSocket(socketObj)
