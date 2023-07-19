@@ -2,20 +2,33 @@ import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../App"
 import User from "./User"
 import CurrentUser from "./CurrentUserCard"
+import Cookies from 'js-cookie';
 
 export default function SideBar({ openChat }) {
     const { currentUser, setOpenedChat, socket } = useContext(AppContext)
     const [ users, setUsers ] = useState([])
     const [ userAvailable, setUserAvailable ] = useState(false)
-    socket.on('new-user', ()=>{
-        setUserAvailable(prv => !prv)
-    })
+    
     // fetch users from `${import.meta.env.VITE_API_URL}/users`
     // setUsers with the response
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API}/users`)
-            .then(res => res.json())
-            .then(data => setUsers(data))
+        if (socket) {
+            socket.on('new-user', ()=>{
+                setUserAvailable(prv => !prv)
+            })
+            socket.on('user-disconnected', ()=>{
+                setUserAvailable(prv => !prv)
+            })
+        }
+        fetch(`${import.meta.env.VITE_API}/users/online`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get('jwt')}`
+            }
+        })
+        .then(res => res.json())
+        .then(data => setUsers(data))
     }, [userAvailable])
 
     return (

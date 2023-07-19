@@ -2,11 +2,12 @@ import { useContext } from "react"
 import { AppContext } from "../App"
 
 export default function Card(){
-    const { currentUser, setIsAuth } = useContext(AppContext)
+    const { currentUser, setIsAuth, socket } = useContext(AppContext)
     const signOut = () => {
         var expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() - 1);
-        document.cookie = `jwt=;expires=${expirationDate};path=/`
+        document.cookie = `jwt=;expires=${expirationDate};path=/`;
+        socket.disconnect();
         setIsAuth(false)
     }
     return (

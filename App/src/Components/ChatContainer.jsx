@@ -4,6 +4,7 @@ import Loading from "./Loading"
 import { AppContext } from "../App"
 import Chat from "./Chat"
 import { motion } from "framer-motion"
+import Cookies from "js-cookie"
 
 export default function ChatContainer(){
     const { openedChat } = useContext(AppContext)
@@ -12,7 +13,14 @@ export default function ChatContainer(){
 
     useEffect(() => {
         if(openedChat){
-            fetch(`${import.meta.env.VITE_API}/users/${openedChat}`)
+            console.log(openedChat)
+            fetch(`${import.meta.env.VITE_API}/users/${openedChat}`,
+            {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${Cookies.get('jwt')}`
+                }
+            })
             .then(res => res.json())
             .then(data => {
                 setUser(data.data)

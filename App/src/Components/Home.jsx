@@ -1,13 +1,26 @@
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../App"
 import SideBar from "./SideBar"
 import { motion } from "framer-motion" 
 import ChatContainer from "./ChatContainer"
+import { Manager } from "socket.io-client";
+
+const manager = new Manager(import.meta.env.VITE_SOCKET_URL)
 
 export default function Home() {
+    const socketObj = manager.socket('/');
+    try {
+        manager.open();
+    } catch (error) {
+        console.log(error)
+    }
     // get the current user from the context
-    const { currentUser, openedChat } = useContext(AppContext)
+    const { currentUser, openedChat, socket, setSocket } = useContext(AppContext)
+    socketObj.emit('connection-success', currentUser._id)
     
+    useEffect(()=>{
+        setSocket(socketObj)
+    },[socketObj])
     return (
         <div className="w-full min-h-screen bg-primary-600 flex justify-center items-center px-10">
             <motion.div

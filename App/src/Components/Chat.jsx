@@ -3,13 +3,20 @@ import ChatHeader from "./ChatHeader";
 import MessageForm from "./MessageForm";
 import { AppContext } from "../App";
 import { useContext, useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 export default function Chat({ user }) {
     const { currentUser, openedChat, socket } = useContext(AppContext)
     const [ messages, setMessages ] = useState([])
 
     function getMessages (){
-        fetch(`${import.meta.env.VITE_API}/messages/${currentUser._id}/${openedChat}`)
+        fetch(`${import.meta.env.VITE_API}/messages/${openedChat}`,
+        {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${Cookies.get('jwt')}`
+            }
+        })
         .then(res => res.json())
         .then(data => {
             setMessages(data.data)
@@ -19,8 +26,6 @@ export default function Chat({ user }) {
     useEffect(() => {
         // feth all the message from the server from /messages/:id with the id of the current user and posting user's id
         getMessages()
-        
-        socket.emit('connection-success', currentUser._id)
 
         socket.on('message', () => {
             getMessages()
@@ -34,7 +39,7 @@ export default function Chat({ user }) {
                 <div className="w-full h-full flex flex-col justify-end items-start gap-2">
                     {
                         messages.map(message => {
-                            if(message.sender._id === currentUser._id){
+                            if(message.sender === currentUser._id){
                                 return <SentMessage key={message._id} user={ currentUser } msg={message} />
                             } else {
                                 return <RecievedMessage key={message._id} user={ user } msg={message} />

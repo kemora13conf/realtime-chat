@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react"
 import { AppContext } from "../App"
+import Cookies from "js-cookie"
 
 export default function MessageForm({ user, setMessages }){
     const { currentUser, socket } = useContext(AppContext)
@@ -7,10 +8,10 @@ export default function MessageForm({ user, setMessages }){
     function handleSubmit(e){
         e.preventDefault()
         console.log('submited')
-        fetch(`${import.meta.env.VITE_API}/messages/${currentUser._id}/${user._id}`,{
+        fetch(`${import.meta.env.VITE_API}/messages/${user._id}`,{
             method: 'POST',
             headers: {
-                'Authorization': `Bareer ${document.cookie.split('=')[1]}`,
+                'Authorization': `Bareer ${Cookies.get('jwt')}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({

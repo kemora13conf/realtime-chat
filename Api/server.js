@@ -38,7 +38,7 @@ function getSocketId(userId){
 }
 
 io.on('connection', (socket) => {
-  // console.log('A user connected ', socket.id);
+  console.log('A user connected ', socket.id);
   socket.on('connection-success', async (userId) => {
     try {
       const user = await UsersModel
@@ -67,7 +67,8 @@ io.on('connection', (socket) => {
   
   socket.on('disconnect', async () => {
     console.log('A user disconnected ', socket.id);
-    await UsersModel.findOneAndUpdate({ socket: socket.id },{ $set: { socket: '' } },{ new: true })
+    await UsersModel.findOneAndUpdate({ socket: socket.id },{ $set: { socket: '' } },{ new: true });
+    socket.broadcast.emit('user-disconnected', true);
   });
 });
 

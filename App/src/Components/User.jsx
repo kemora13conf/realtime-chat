@@ -17,7 +17,7 @@ export default function User({ user, handleClick }) {
                     { user.username }
                 </div>
                 <div className="font-light text-tertiary-500">
-                    { "something" }
+                    { "Online" }
                 </div>
             </div>
         </div>        

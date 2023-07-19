@@ -7,20 +7,12 @@ import Login from './Components/Login'
 import Protected from './Components/ProtectedRoute'
 import Loading from './Components/Loading'
 import Home from './Components/Home'
-import { Manager } from "socket.io-client";
-
-const manager = new Manager(import.meta.env.VITE_SOCKET_URL)
 
 const AppContext = createContext()
 const AppProvider = (props)=>{
-  const socketObj = manager.socket('/');
-  try {
-      manager.open();
-  } catch (error) {
-      console.log(error)
-  }
+  
   const [ openedChat, setOpenedChat ] = useState(null)
-  const [ socket, setSocket ] = useState(socketObj)
+  const [ socket, setSocket ] = useState(null)
   const [ isDark, setIsDark ] = useState(false)
 
   const state = {
@@ -35,9 +27,6 @@ const AppProvider = (props)=>{
     isDark: isDark,
     setIsDark: setIsDark
   }
-  useEffect(()=>{
-    setSocket(socketObj)
-  },[socketObj])
   return (
     <AppContext.Provider value={state}>
       { props.children }

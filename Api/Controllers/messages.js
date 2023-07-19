@@ -1,6 +1,7 @@
 import { answerObject } from '../Helpers/utils.js';
 import Messages from '../Models/Messages.js'
 import Users from '../Models/Users.js';
+import { ObjectId } from 'mongodb';
 
 const findSenderById = async (req, res, next, id) => {
     try {
@@ -29,9 +30,14 @@ const findReceiverById = async (req, res, next, id) => {
 
 const getMessages = async (req, res) => {
     try {
-        console.log(req.sender._id, req.receiver._id);
-        const { sender, receiver } = req;
-        const messages = await Messages.find({ $or: [{ sender, receiver }, { sender: receiver, receiver: sender }] }).populate('sender').populate('receiver');
+        const { user, receiver } = req;
+        // console.log('one :' ,user, receiver)
+
+        const userId = new ObjectId(user._id);
+        const receiverId = new ObjectId(receiver._id);
+        console.log(userId, ' ', receiverId)
+        const messages = await Messages.find();
+        // console.log(messages)
         return res.status(200).json(answerObject('success', 'Messages fetched successfully', messages));
     }catch(err){
         return res.status(500).json(answerObject('error', 'Internal server error'));
@@ -40,7 +46,8 @@ const getMessages = async (req, res) => {
 
 const create = async (req, res) => {
     try {
-        const { sender, receiver } = req;
+        console.log(req.body)
+        const { user, receiver } = req;
         let message = await Messages.create(req.body)
         message = await Messages.findOne({ _id: message._id }).populate('sender').populate('receiver')
         return res.status(200).json(answerObject('success', 'Message created successfully', message));
