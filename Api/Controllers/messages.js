@@ -36,7 +36,7 @@ const getMessages = async (req, res) => {
         const userId = new ObjectId(user._id);
         const receiverId = new ObjectId(receiver._id);
         console.log(userId, ' ', receiverId)
-        const messages = await Messages.find();
+        const messages = await Messages.find({ $or: [{ sender: userId, receiver: receiverId }, { sender: receiverId, receiver: userId }] });
         // console.log(messages)
         return res.status(200).json(answerObject('success', 'Messages fetched successfully', messages));
     }catch(err){
@@ -49,7 +49,7 @@ const create = async (req, res) => {
         console.log(req.body)
         const { user, receiver } = req;
         let message = await Messages.create(req.body)
-        message = await Messages.findOne({ _id: message._id }).populate('sender').populate('receiver')
+        message = await Messages.findOne({ _id: message._id });
         return res.status(200).json(answerObject('success', 'Message created successfully', message));
     }catch(err){
         console.log(err.message)

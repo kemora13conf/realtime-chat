@@ -13,7 +13,9 @@ export default function SideBar({ openChat }) {
     // setUsers with the response
     useEffect(() => {
         if (socket) {
+            console.log('socket: ', socket)
             socket.on('new-user', ()=>{
+                console.log('new-user')
                 setUserAvailable(prv => !prv)
             })
             socket.on('user-disconnected', ()=>{
@@ -29,7 +31,7 @@ export default function SideBar({ openChat }) {
         })
         .then(res => res.json())
         .then(data => setUsers(data))
-    }, [userAvailable])
+    }, [userAvailable, socket])
 
     return (
         

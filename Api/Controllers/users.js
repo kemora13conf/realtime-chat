@@ -15,7 +15,7 @@ async function onlineOnly (req, res) {
     // get all the users and return them
     try {
         // get the users with socket not empty
-        const users = await Users.find({ socket: { $ne: '' }, _id: { $ne: req.user._id } });
+        const users = await Users.find({ _id: { $ne: req.user._id } });
         res.status(200).json(answerObject('success', 'Users found', users));
     } catch (error) {
         res.status(500).json(answerObject('error', error.message));

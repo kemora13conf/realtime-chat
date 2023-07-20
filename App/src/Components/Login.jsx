@@ -40,6 +40,7 @@ const Login = function () {
             var expirationDate = new Date();
             expirationDate.setDate(expirationDate.getDate() + 3);
             document.cookie = `jwt=${encodeURIComponent(data.data)};expires=${expirationDate};path=/`;
+            socket.emit('new-user', true)
             setIsAuth(true);
         })
         .catch(error => {
