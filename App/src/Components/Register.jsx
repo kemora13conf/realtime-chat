@@ -36,9 +36,9 @@ const Register = function () {
             body: formData
         })
         .then(response => response.json())
-        .then(data => {
+        .then(({ data }) => {
             console.log(data);
-            socket.emit('new-user', true)
+            socket.emit('new-user', {userId: data._id})
         })
         .catch(error => {
             console.log(error);

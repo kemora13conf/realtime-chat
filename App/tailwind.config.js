@@ -55,7 +55,9 @@ export default {
       card: 'rgba(0, 0, 0,.3 ) 0px 20px 30px -10px',
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/container-queries')
+  ],
   content: [
     './src/**/*{.js,.jsx,.ts,.tsx}',
     './index.html',

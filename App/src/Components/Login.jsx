@@ -15,14 +15,6 @@ const Login = function () {
     const file = useRef(null);
     const image = useRef(null);
     
-    const handleFileImport = function (event) {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            image.current.src = event.target.result;
-        }
-        reader.readAsDataURL(file);
-    }
 
 
     const onSubmit = function (data) {
@@ -36,11 +28,12 @@ const Login = function () {
             body: JSON.stringify(data),
         })
         .then(response => response.json())
-        .then(data => {
+        .then(({data}) => {
             var expirationDate = new Date();
             expirationDate.setDate(expirationDate.getDate() + 3);
-            document.cookie = `jwt=${encodeURIComponent(data.data)};expires=${expirationDate};path=/`;
-            socket.emit('new-user', true)
+            document.cookie = `jwt=${encodeURIComponent(data.token)};expires=${expirationDate};path=/`;
+            console.log(socket)
+            socket.emit('new-user', { userId: data.userId })
             setIsAuth(true);
         })
         .catch(error => {
@@ -61,8 +54,9 @@ const Login = function () {
     return (
         <motion.div className="relative w-full min-h-screen flex flex-col justify-center items-center bg-primary-500">
             <motion.form 
-                initial={{opacity: 0, scale: 0.5}}
-                animate={{opacity: 1, scale: 1}}
+                initial={{opacity: 0, top: '20px'}}
+                animate={{opacity: 1, top: 'unset'}}
+                exit={{opacity: 0, top: '20px'}}
                 transition={{
                     type: 'tween',
                     duration: 0.3
