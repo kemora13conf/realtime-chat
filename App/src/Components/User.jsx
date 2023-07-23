@@ -1,11 +1,13 @@
 import { useContext } from "react"
 import { AppContext } from "../App"
 
-export default function User({ user, handleClick }) {
+export default function User({ user, handleClick, index }) {
+    console.log(index)
     const { currentUser, setOpenedChat } = useContext(AppContext)
     // return a jsx for user model containing the user's profile picture, username, and last message
     return (
         <div 
+            key={index}
             onClick={()=>{
                 setOpenedChat(user._id)
             }}

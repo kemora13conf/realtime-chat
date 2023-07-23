@@ -43,7 +43,7 @@ export default function ChatContainer(){
                 type: 'tween',
                 duration: 2
             }} 
-            className="flex flex-col w-full overflow-hidden">
+            className="flex flex-col w-full">
             {
                 !openedChat
                 ? <EmptyChat />

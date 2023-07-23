@@ -21,8 +21,7 @@ export default function Chat({ user }) {
         .then(data => {
             setMessages(data.data)
         })
-    }
-    console.log(messages)
+    }   
     useEffect(() => {
         // feth all the message from the server from /messages/:id with the id of the current user and posting user's id
         getMessages()

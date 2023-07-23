@@ -35,7 +35,7 @@ export default function SideBar({ openChat, parentWidth }) {
 
     return (
         parentWidth > 600 
-        ? <div 
+        ? <div
             className="w-full min-h-[600px] flex flex-col items-center gap-5 p-4 bg-secondary-500 
             absolute transition-all duration-300 ease-in-out
             @[600px]/home:h-full @[600px]/home:static @[600px]/home:max-w-[300px]">
@@ -46,11 +46,11 @@ export default function SideBar({ openChat, parentWidth }) {
                     users.data
                         .map((user, index) => {
                             if (index == users.data.length - 1)
-                                return <User key={user._id} user={user} />
+                                return <User key={index} index={user._id} user={user} />
                             else
                                 return <>
-                                        <User key={user._id} user={user} className="mb-5" />
-                                        <div className="w-2/3 h-[1.3px] bg-secondary-400 mx-auto my-2 rounded-md"></div>
+                                        <User key={user._id} index={user._id} user={user} className="mb-5" />
+                                        <div key={index} className="w-2/3 h-[1.3px] bg-secondary-400 mx-auto my-2 rounded-md"></div>
                                     </>
                         }) 
                 }
@@ -61,16 +61,17 @@ export default function SideBar({ openChat, parentWidth }) {
             absolute transition-all duration-300 ease-in-out
             @[600px]/home:h-full @[600px]/home:static @[600px]/home:max-w-[300px]`}>
             <CurrentUser />
-            <div className="w-full rounded-xl py-3 max-h-[360px] overflow-y-auto scroll-m-2 px-2">
+            <div 
+                className="w-full rounded-xl py-3 max-h-[360px] overflow-y-auto scroll-m-2 px-2">
                 { 
                     users.data && 
                     users.data
                         .map((user, index) => {
                             if (index == users.data.length - 1)
-                                return <User key={user._id} user={user} />
+                                return <User key={index} index={user._id} user={user} />
                             else
                                 return <>
-                                        <User key={user._id} user={user} className="mb-5" />
+                                        <User key={index} index={user._id} user={user} className="mb-5" />
                                         <div className="w-2/3 h-[1.3px] bg-secondary-400 mx-auto my-2 rounded-md"></div>
                                     </>
                         }) 
