@@ -34,7 +34,7 @@ const login = async (req, res) => {
             return res.status(404).json(answerObject('password', `Wrong password!`))
         }
         const token = jwt.sign({_id: user._id }, process.env.JWT_SECRET)
-        return res.status(200).json(answerObject('success', `Logged in successefully!`, token))
+        return res.status(200).json(answerObject('success', `Logged in successefully!`, {userId: user._id, token: token}))
     } catch (error) {
         return res.status(500).json(answerObject('error', 'Something went wrong!'))
     }   

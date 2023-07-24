@@ -7,7 +7,7 @@ import { config } from 'dotenv';
 import { Server } from 'socket.io';
 import http from 'http';
 import MessagesModel from './Models/Messages.js';
-import UsersModel from './Models/Users.js'
+import UsersModel from './Models/Users.js';
 
 // Setting up the config
 config();
@@ -37,19 +37,23 @@ function getSocketId(userId){
   })
 }
 
+async function updateUserSocket(userId, socketId){
+  try {
+    const user = await UsersModel
+                  .findOneAndUpdate(
+                    { _id: userId}, 
+                    {$set : { socket: socketId}}, 
+                    { new: true }
+                  );
+  } catch (error) {
+    console.log(error.message)
+  }
+}
+
 io.on('connection', (socket) => {
   console.log('A user connected ', socket.id);
   socket.on('connection-success', async (userId) => {
-    try {
-      const user = await UsersModel
-                    .findOneAndUpdate(
-                      { _id: userId}, 
-                      {$set : { socket: socket.id}}, 
-                      { new: true }
-                    );
-    } catch (error) {
-      console.log(error.message)
-    }
+    await updateUserSocket(userId, socket.id)
   })
   
   socket.on('message', async (userId) => {
@@ -60,15 +64,16 @@ io.on('connection', (socket) => {
       console.log(error.message)
     }
   });
-  socket.on('new-user', ()=>{
+  socket.on('new-user', async ({ userId })=>{
     console.log("new user emitted")
+    await updateUserSocket(userId, socket.id)
     socket.broadcast.emit('new-user', true)
   })
   
   socket.on('disconnect', async () => {
     console.log('A user disconnected ', socket.id);
     await UsersModel.findOneAndUpdate({ socket: socket.id },{ $set: { socket: '' } },{ new: true });
-    socket.broadcast.emit('user-disconnected', true);
+    socket.broadcast.emit('new-user', true);
   });
 });
 
@@ -97,12 +102,10 @@ const corsOptions = {
 
 // Setting up the middlewares
 app.use(express.static(path.join(__dirname, 'Assets')));
+app.use('/assets', express.static(path.join(__dirname, '/dist/assets')));
 app.use(express.json());
 app.use(cors(corsOptions));
 
-app.get('/', (req, res) => {
-    res.status(200).json({ message: 'This is the api for the realtime chat application' });
-});
 
 // Importing the routes
 import authRouter from './Routes/Auth.js';
@@ -115,6 +118,10 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', Users);
 app.use('/api/messages', Messages);
 
-server.listen(3000, () => {
-    console.log('Server is running on PORT http://localhost:3000');
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname+'/dist/index.html'));
+});
+
+server.listen(8080, () => {
+    console.log('Server is running on PORT http://localhost:8080');
 });
