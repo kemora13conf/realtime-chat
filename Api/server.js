@@ -111,7 +111,6 @@ app.use(cors(corsOptions));
 import authRouter from './Routes/Auth.js';
 import Users from './Routes/Users.js'
 import Messages from './Routes/Messages.js'
-import { getRandomValues } from 'crypto';
 
 // Setting up the routes
 app.use('/api/auth', authRouter);
