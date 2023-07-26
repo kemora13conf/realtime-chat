@@ -1,13 +1,14 @@
 import { motion } from "framer-motion"
 import { useContext, useRef, useState } from "react";
 import { useForm } from 'react-hook-form';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../App";
 
 
 const Register = function () {
     const { isAuth, socket } = useContext(AppContext)
     const { register, handleSubmit} = useForm();
+    const navigate = useNavigate();
     const [ errors, setErrors ] = useState({});
     const file = useRef(null);
     const image = useRef(null);
@@ -39,6 +40,7 @@ const Register = function () {
         .then(({ data }) => {
             console.log(data);
             socket.emit('new-user', {userId: data._id})
+            navigate('/login');
         })
         .catch(error => {
             console.log(error);
