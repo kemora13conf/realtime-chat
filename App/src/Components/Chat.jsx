@@ -34,7 +34,7 @@ export default function Chat({ user }) {
     return (
         <>
             <ChatHeader user={user} />
-            <div className="w-full h-full px-5 py-5 max-h-[450px] overflow-y-scroll scroll-m-2">    
+            <div className="w-full h-full max-h-[450px] overflow-y-auto px-5 py-5">    
                 <div className="w-full h-fit flex flex-col justify-end items-start gap-2">
                     {
                         messages.map(message => {

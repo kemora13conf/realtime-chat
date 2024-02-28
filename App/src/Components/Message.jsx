@@ -39,7 +39,7 @@ function SentMessage ({ user, msg }){
                     src={`${import.meta.env.VITE_ASSETS}Profile-pictures/${user.profilePicture}`} />
             </div>
             <div 
-                className="relative flex flex-col gap-0 mt-1
+                className="flex flex-col gap-0 mt-1
                             rounded-xl rounded-tl-lg 
                             bg-secondary-500 
                             px-5 py-2 min-w-[200px] 
