@@ -35,7 +35,7 @@ export default function Chat({ user }) {
         <>
             <ChatHeader user={user} />
             <div className="w-full h-full px-5 py-5 max-h-[450px] overflow-y-scroll scroll-m-2">    
-                <div className="w-full h-full flex flex-col justify-end items-start gap-2">
+                <div className="w-full h-fit flex flex-col justify-end items-start gap-2">
                     {
                         messages.map(message => {
                             if(message.sender === currentUser._id){

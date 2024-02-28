@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
     "autoprefixer": "^10.4.14",
     "framer-motion": "^10.12.18",
     "js-cookie": "^3.0.5",
