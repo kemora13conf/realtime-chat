@@ -1,9 +1,7 @@
-import { useContext, useEffect, useState } from "react"
-import { AppContext } from "../App"
+import { useEffect, useState } from "react"
 import Cookies from "js-cookie"
 
 export default function MessageForm({ user, setMessages }){
-    const { currentUser, socket } = useContext(AppContext)
     const [ msg, setMsg ] = useState('')
     function handleSubmit(e){
         e.preventDefault()

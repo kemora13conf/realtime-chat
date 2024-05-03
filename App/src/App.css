@@ -1,3 +1,53 @@
+@font-face{
+    font-family: 'Lora';
+    font-style: normal;
+    src: url('./assets/fonts/Lora/Lora-VariableFont_wght.ttf');
+}
+@font-face{
+    font-family: 'Lora-Italic';
+    font-style: italic;
+    src: url('./assets/fonts/Lora/Lora-Italic-VariableFont_wght.ttf');
+}
+@font-face{
+    font-family: 'Montserrat';
+    font-style: normal;
+    src: url('./assets/fonts/Montserrat/Montserrat-VariableFont_wght.ttf');
+}
+@font-face{
+    font-family: 'Montserrat-Italic';
+    font-style: italic;
+    src: url('./assets/fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf');
+}
+
+
+@font-face{
+    font-family: 'Poppins-light';
+    font-weight: light;
+    font-style: normal;
+    src: url('./assets/fonts/Poppins/Poppins-Light.ttf');
+}
+@font-face{
+    font-family: 'Poppins';
+    font-style: normal;
+    src: url('./assets/fonts/Poppins/Poppins-Regular.ttf');
+}
+@font-face{
+    font-family: 'Poppins-medium';
+    font-style: normal;
+    src: url('./assets/fonts/Poppins/Poppins-Medium.ttf');
+}
+@font-face{
+    font-family: 'Poppins-bold';
+    font-weight: bold;
+    font-style: normal;
+    src: url('./assets/fonts/Poppins/Poppins-Bold.ttf');
+}
+@font-face{
+    font-family: 'Poppins-extrabold';
+    font-style: normal;
+    src: url('./assets/fonts/Poppins/Poppins-ExtraBold.ttf');
+}
+
 /* For WebKit browsers (e.g., Chrome, Safari) */
 ::-webkit-scrollbar {
   width: 8px;
@@ -19,6 +69,7 @@
   scrollbar-width: thin;
   scrollbar-color: #4a5568 #cbd5e0;
   box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
 }
 body{
   scroll-behavior: smooth;

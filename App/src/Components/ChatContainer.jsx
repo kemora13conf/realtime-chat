@@ -1,13 +1,10 @@
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import EmptyChat from "./EmptyChat"
-import Loading from "./Loading"
-import { AppContext } from "../App"
 import Chat from "./Chat"
 import { motion } from "framer-motion"
 import Cookies from "js-cookie"
 
 export default function ChatContainer(){
-    const { openedChat } = useContext(AppContext)
     const [ user, setUser ] = useState({})
     const [ loaded, setLoaded ] = useState(false)
 
@@ -32,9 +29,6 @@ export default function ChatContainer(){
         } else setLoaded(true)
     }, [openedChat])
 
-    if (!loaded) {
-        return <Loading></Loading>
-    }
     return (
         <motion.div 
             initial={{opacity: 0, blur: '10px'}}

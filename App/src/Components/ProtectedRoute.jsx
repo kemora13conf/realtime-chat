@@ -1,19 +1,18 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { AppContext } from '../App';
-import { useContext } from 'react';
-import Login from './Login';
+import { Outlet, useNavigate } from 'react-router-dom'
+import Login from '../Layout/Auth/Login';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
-const Protected = ()=>{
-    const { isAuth } = useContext(AppContext)
-    return (
-        <>
-            {
-                isAuth
-                ? <Outlet />
-                : <Login />
-            }
-        </>
-    )
+const Protected = () => {
+    const auth = useSelector((state) => state.auth);
+    const Navigate = useNavigate();
+    useEffect(() => {
+        if (!auth.isAuthenticated) {
+            Navigate("/login");
+        }
+    }, [auth.isAuthenticated]);
+    return auth.isAuthenticated ? <Outlet /> : <Login />;
+    
 }
 
 export default Protected;

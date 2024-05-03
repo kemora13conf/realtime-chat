@@ -1,12 +1,10 @@
 import { RecievedMessage, SentMessage } from "./Message";
 import ChatHeader from "./ChatHeader";
 import MessageForm from "./MessageForm";
-import { AppContext } from "../App";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 
 export default function Chat({ user }) {
-    const { currentUser, openedChat, socket } = useContext(AppContext)
     const [ messages, setMessages ] = useState([])
 
     function getMessages (){

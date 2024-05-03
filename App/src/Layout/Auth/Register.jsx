@@ -2,13 +2,9 @@ import { motion } from "framer-motion"
 import { useContext, useRef, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from "react-router-dom";
-import { AppContext } from "../App";
 
 
 const Register = function () {
-    const { isAuth, socket } = useContext(AppContext)
-    const { register, handleSubmit} = useForm();
-    const navigate = useNavigate();
     const [ errors, setErrors ] = useState({});
     const file = useRef(null);
     const image = useRef(null);
@@ -45,10 +41,6 @@ const Register = function () {
         .catch(error => {
             console.log(error);
         });
-    }
-    if(isAuth){
-        console.log('isAuth: ',isAuth)
-        navigate('/')
     }
 
     return (

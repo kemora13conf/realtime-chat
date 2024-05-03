@@ -1,11 +1,10 @@
-import { useContext, useEffect, useState } from "react"
-import { AppContext } from "../App"
+import { useEffect, useState } from "react";
 import User from "./User"
 import CurrentUser from "./CurrentUserCard"
 import Cookies from 'js-cookie';
 
 export default function SideBar({ openChat, parentWidth }) {
-    const { currentUser, openedChat,setOpenedChat, socket } = useContext(AppContext)
+    
     const [ users, setUsers ] = useState([])
     
     // fetch users from `${import.meta.env.VITE_API_URL}/users`

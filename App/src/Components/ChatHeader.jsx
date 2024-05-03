@@ -1,8 +1,6 @@
-import { useContext } from "react"
-import { AppContext } from "../App"
+
 
 const ChatHeader = ({ user }) => {
-    const { setOpenedChat } = useContext(AppContext)
     return (
         <div className="w-full flex justify-between items-center h-[80px] bg-secondary-500 px-5">
             <div className="flex items-center gap-2">
