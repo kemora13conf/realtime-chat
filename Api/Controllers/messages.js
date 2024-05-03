@@ -1,9 +1,11 @@
+import Database from '../Database.js';
 import { answerObject } from '../Helpers/utils.js';
 import Messages from '../Models/Messages.js'
 import Users from '../Models/Users.js';
 import { ObjectId } from 'mongodb';
 
 const findSenderById = async (req, res, next, id) => {
+    const db = await Database.getInstance();
     try {
         const sender = await Users.findById({ _id: id });
         if (!sender) {
@@ -16,6 +18,7 @@ const findSenderById = async (req, res, next, id) => {
     }
 }
 const findReceiverById = async (req, res, next, id) => {
+    const db = await Database.getInstance();
     try {
         const receiver = await Users.findById({ _id: id });
         if (!receiver) {
@@ -29,6 +32,7 @@ const findReceiverById = async (req, res, next, id) => {
 }
 
 const getMessages = async (req, res) => {
+    const db = await Database.getInstance();
     try {
         const { user, receiver } = req;
         // console.log('one :' ,user, receiver)
@@ -45,6 +49,7 @@ const getMessages = async (req, res) => {
 }
 
 const create = async (req, res) => {
+    const db = await Database.getInstance();    
     try {
         console.log(req.body)
         const { user, receiver } = req;

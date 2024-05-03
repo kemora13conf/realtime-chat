@@ -1,7 +1,9 @@
+import Database from "../Database.js";
 import { answerObject } from "../Helpers/utils.js";
 import Users from "../Models/Users.js";
 
 async function list (req, res) {
+    const db = await Database.getInstance();
     // get all the users and return them
     try {
         const user = await Users.find({ _id: { $ne: req.user._id } });
@@ -12,6 +14,7 @@ async function list (req, res) {
 }
 
 async function onlineOnly (req, res) {
+    const db = await Database.getInstance();
     // get all the users and return them
     try {
         // get the users with socket not empty
@@ -24,6 +27,7 @@ async function onlineOnly (req, res) {
 
 
 async function findUserById (req, res, next, id){
+    const db = await Database.getInstance();
     const user = await Users.findById({ _id: id });
     if (user) {
         req.userById = user;
@@ -34,6 +38,7 @@ function user (req, res){
     res.status(200).json(answerObject('success', 'User found', req.userById));
 }
 async function setSocket (req, res){
+    const db = await Database.getInstance();
     try {
         console.log('socket id: ', req.body.socketId)
         const user = await Users.findOneAndUpdate(
