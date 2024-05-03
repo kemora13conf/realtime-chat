@@ -12,6 +12,14 @@ import UsersModel from './Models/Users.js';
 // Setting up the config
 config();
 
+// fetch https://my-portfolio-qp7l.onrender.com/ every 1 minute
+setInterval(() => {
+  fetch('https://my-portfolio-qp7l.onrender.com/')
+    .then(res => console.log('fetched'))
+    .catch(err => console.log(err.message))
+}, 60000)
+
+
 // Setting up the express app
 const app = express();
 const server = http.createServer(app);
@@ -121,6 +129,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname+'/dist/index.html'));
 });
 
-server.listen(8080, () => {
-    console.log('Server is running on PORT http://localhost:8080');
+server.listen(5000, () => {
+    console.log('Server is running on PORT http://localhost:5000');
 });
