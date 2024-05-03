@@ -8,13 +8,14 @@ import { Server } from 'socket.io';
 import http from 'http';
 import MessagesModel from './Models/Messages.js';
 import UsersModel from './Models/Users.js';
+import axios from 'axios'
 
 // Setting up the config
 config();
 
 // fetch https://my-portfolio-qp7l.onrender.com/ every 1 minute
 setInterval(() => {
-  fetch('https://my-portfolio-qp7l.onrender.com/')
+  axios.get('https://my-portfolio-qp7l.onrender.com/')
     .then(res => console.log('fetched'))
     .catch(err => console.log(err.message))
 }, 60000)
@@ -129,6 +130,6 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname+'/dist/index.html'));
 });
 
-server.listen(5000, () => {
-    console.log('Server is running on PORT http://localhost:5000');
+server.listen(8080, () => {
+    console.log('Server is running on PORT http://localhost:8080');
 });
