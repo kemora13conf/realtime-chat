@@ -22,13 +22,21 @@ const usersSchema = new mongoose.Schema(
       minLength: 3,
       maxLength: 50,
     },
+    token: {
+      type: String,
+      default: "",
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: true,
       trim: true,
       minLength: 6,
     },
-    profilePicture: {
+    "profile-picture": {
       type: String,
       default: "Avatar.png",
     },

@@ -3,25 +3,63 @@ import jwt from "jsonwebtoken";
 import { answerObject } from "../Helpers/utils.js";
 import Database from "../Database.js";
 import { JWT_SECRET } from "../Config/index.js";
+import validator from 'validator';
+
+const validateUsername = async (req, res, next) => {
+  const db = await Database.getInstance();
+  try {
+    const username = req.body.username ? req.body.username.trim() : "";
+    const error = {};
+    if (!username) {
+      error.username = "Username is required!";
+    } else if (username.length < 3 || username.length > 20) {
+      error.username = "Username must be between 3 and 20 characters.";
+    } else {
+      const user = await Users.findOne({ username });
+      if (user) {
+        error.username = "This username is already taken.";
+      }
+    }
+
+    if (Object.keys(error).length > 0) {
+      return res.status(200).json(answerObject("username", error.username));
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json(answerObject("error", error.message));
+  }
+};
+
+const validateEmail = async (req, res, next) => {
+  const db = await Database.getInstance();
+  try {
+    const email = req.body.email ? req.body.email.trim().toLowerCase() : ""; // Normalize email
+    const error = {};
+    if (!email) {
+      error.email = "Email is required!";
+    } else if (!validator.isEmail(email)) {
+      // Use validator library for comprehensive check
+      error.email = "Please enter a valid email address.";
+    } else {
+      const user = await Users.findOne({ email }); // Check for existing user with normalized email
+      if (user) {
+        error.email = "This email address is already registered.";
+      }
+    }
+
+    if (Object.keys(error).length > 0) {
+      return res.status(200).json(answerObject("email", error.email)); // Use 400 status code
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json(answerObject("error", error.message));
+  }
+};
 
 const register = async (req, res) => {
   const db = await Database.getInstance();
-  if (
-    !req.body.username ||
-    !req.body.email ||
-    !req.body.password ||
-    !req.body.passwordConfirmation
-  ) {
-    return res
-      .status(400)
-      .json(answerObject("error", "Please fill in all fields"));
-  }
-  if (req.body.password !== req.body.passwordConfirmation) {
-    return res
-      .status(400)
-      .json(answerObject("error", "Passwords do not match"));
-  }
-
   try {
     const user = await Users.create(req.body);
     user.save();
@@ -32,9 +70,7 @@ const register = async (req, res) => {
     return res.status(500).json(answerObject("error", error.message));
   }
 };
-
-const login = async (req, res) => {
-  const db = await Database.getInstance();
+const validateLoginData = async (req, res, next) => {
   try {
     const user = await Users.findOne({ username: req.body.username });
     if (!user) {
@@ -52,11 +88,20 @@ const login = async (req, res) => {
         .status(200)
         .json(answerObject("password", `Incorrect password!`));
     }
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-    user.password = undefined;
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(500).json(answerObject("error", err.message));
+  }
+};
+const login = async (req, res) => {
+  const db = await Database.getInstance();
+  try {
+    const token = jwt.sign({ _id: req.user._id }, process.env.JWT_SECRET);
+    req.user.password = undefined;
     return res.status(200).json(
       answerObject("success", `Logged in successefully!`, {
-        user,
+        user: req.user,
         token: token,
       })
     );
@@ -98,4 +143,4 @@ async function requireSingin(req, res, next) {
   }
 }
 
-export { register, login, requireSingin };
+export { validateUsername, validateEmail, register, validateLoginData, login, requireSingin };
