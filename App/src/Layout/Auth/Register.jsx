@@ -14,18 +14,22 @@ import {
 import Spinner from "../../Components/Spinner.jsx";
 import Cookies from "js-cookie";
 import RegisterFormStep3 from "../../Components/Auth/RegisterFormStep3.jsx";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Register = function () {
   const { register, handleSubmit } = useForm();
   const auth = useSelector((state) => state.auth);
   const global = useSelector((state) => state.global);
   const dispatch = useDispatch();
-
+  const Navigate = useNavigate();
+  
+  let [imageFileContext, setImageFileContext] = useState(null);
   const onSubmit = async function (data) {
     dispatch(AuthLoading(true));
     if (auth.registration.step == 1) {
       const response = await fetch(
-        `${import.meta.env.VITE_API}/auth//registration/step-1`,
+        `${import.meta.env.VITE_API}/auth/registration/step-1`,
         {
           method: "POST",
           headers: {
@@ -54,6 +58,8 @@ const Register = function () {
         } else if (res.type == "email") {
           dispatch(errors({ email: res.message }));
         }
+      } else {
+        toast.error("An error occured, please try again later!");
       }
     } else if (auth.registration.step == 2) {
       if (!data.password) {
@@ -71,11 +77,56 @@ const Register = function () {
           })
         );
         dispatch(setRegistrationStep(3));
+      } 
+    } else if (auth.registration.step == 3) {
+      const formData = new FormData();
+      formData.append("image", imageFileContext);
+      formData.append("username", auth.registration.data.username);
+      formData.append("email", auth.registration.data.email);
+      formData.append("password", auth.registration.data.password);
+      const response = await fetch(
+        `${import.meta.env.VITE_API}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Cookies.get("jwt")}`,
+          },
+          body: formData,
+        }
+      );
+      if (response.ok) {
+        const res = await response.json();
+        if (res.type == "success") {
+          dispatch(errors({}));
+          toast.success("Account created successfully!", {theme:'dark'});
+          Navigate("/login");
+        } else if (res.type == "username") {
+          dispatch(errors({ username: res.message }));
+          dispatch(setRegistrationStep(1));
+        } else if (res.type == "email") {
+          dispatch(errors({ email: res.message }));
+          dispatch(setRegistrationStep(1));
+        } else if (res.type == "password") {
+          dispatch(errors({ password: res.message }));
+          dispatch(setRegistrationStep(2));
+        } else if (res.type == "image") {
+          dispatch(errors({ image: res.message }));
+          dispatch(setRegistrationStep(3));
+        }
+      } else {
+        toast.error("An error occured, please try again later!");
       }
     }
     dispatch(AuthLoading(false));
   };
-
+  useEffect(() => {
+    if (!global.loading) {
+      dispatch(GlobalLoading(false));
+    }
+    return () => {
+      dispatch(GlobalLoading(true));
+    };
+  }, []);
   return (
     <motion.div
       className="w-full min-h-screen flex flex-col justify-center items-center 
@@ -99,7 +150,10 @@ const Register = function () {
           ) : auth.registration.step == 2 ? (
             <RegisterFormStep2 register={register} />
           ) : (
-            <RegisterFormStep3 register={register} />
+            <RegisterFormStep3
+              register={register}
+              setImageFileContext={setImageFileContext}
+            />
           )}
         </AnimatePresence>
 

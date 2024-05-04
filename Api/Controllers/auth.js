@@ -3,7 +3,10 @@ import jwt from "jsonwebtoken";
 import { answerObject } from "../Helpers/utils.js";
 import Database from "../Database.js";
 import { JWT_SECRET } from "../Config/index.js";
-import validator from 'validator';
+import validator from "validator";
+import { __dirname } from "../App.js";
+import path from 'path';
+import fs from 'fs';
 
 const validateUsername = async (req, res, next) => {
   const db = await Database.getInstance();
@@ -58,10 +61,54 @@ const validateEmail = async (req, res, next) => {
   }
 };
 
+function getFilename(originalname) {
+  let arrName = originalname.split(".");
+  let extension = arrName[arrName.length - 1];
+  let nameWithoutExtension = arrName.slice(0, arrName.length - 1).join(".");
+  let saveAs = `${nameWithoutExtension}.${extension}`;
+  return saveAs;
+}
+
+function saveFile(file, location) {
+  let saveAs = getFilename(file.originalname);
+  let imageBuffer = file.buffer;
+  let filePath = path.join(__dirname, location, saveAs);
+  fs.writeFileSync(filePath, imageBuffer);
+  return saveAs;
+}
+
+// Middleware for validating image file upload
+export const validateImageFile = async (req, res, next) => {
+  if (!req.file) {
+    return res.status(200).json(answerObject("image", "Image file is required"));
+  } else {
+    const { mimetype, size } = req.file;
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+    const maxSize = 1024 * 1024 * 2; // 2MB
+
+    // Check if file is an image and size is within limit
+    if (!allowedTypes.includes(mimetype)) {
+      return res.status(200).json(answerObject("image", "Only images are allowed"));
+    } else if (size > maxSize) {
+      return res.status(200).json(answerObject("image", "Image size should not exceed 2MB"));
+    }
+  }
+  next();
+};
+
 const register = async (req, res) => {
   const db = await Database.getInstance();
   try {
-    const user = await Users.create(req.body);
+    let imageName = saveFile(
+      req.file,
+      "Assets/Profile-pictures"
+    );
+    const user = await Users.create({
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
+      "profile-picture": imageName,
+    });
     user.save();
     return res
       .status(201)
@@ -72,6 +119,7 @@ const register = async (req, res) => {
 };
 const validateLoginData = async (req, res, next) => {
   try {
+    const db = await Database.getInstance()
     const user = await Users.findOne({ username: req.body.username });
     if (!user) {
       return res
@@ -95,8 +143,8 @@ const validateLoginData = async (req, res, next) => {
   }
 };
 const login = async (req, res) => {
-  const db = await Database.getInstance();
   try {
+    const db = await Database.getInstance();
     const token = jwt.sign({ _id: req.user._id }, process.env.JWT_SECRET);
     req.user.password = undefined;
     return res.status(200).json(
@@ -109,7 +157,6 @@ const login = async (req, res) => {
     return res.status(500).json(answerObject("error", "Something went wrong!"));
   }
 };
-
 async function requireSingin(req, res, next) {
   const db = await Database.getInstance();
   try {
@@ -143,4 +190,11 @@ async function requireSingin(req, res, next) {
   }
 }
 
-export { validateUsername, validateEmail, register, validateLoginData, login, requireSingin };
+export {
+  validateUsername,
+  validateEmail,
+  register,
+  validateLoginData,
+  login,
+  requireSingin,
+};

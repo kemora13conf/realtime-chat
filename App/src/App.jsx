@@ -8,12 +8,15 @@ import Home from "./Layout/App/Home.jsx";
 import BaseLayout from "./Layout/BaseLayout";
 import Store from "./Store/Store.js";
 import Protected from "./Components/Protection/ProtectedRoute.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <BrowserRouter>
       <Provider store={Store}>
         <AnimatePresence mode="wait">
+          <ToastContainer />
           <Routes>
             <Route path="/*">
               <Route element={<BaseLayout />}>

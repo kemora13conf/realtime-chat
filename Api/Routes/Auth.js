@@ -7,6 +7,7 @@ import {
   requireSingin,
   validateEmail,
   validateUsername,
+  validateImageFile,
 } from "../Controllers/auth.js";
 import { answerObject } from "../Helpers/utils.js";
 import upload from "../Controllers/multer-config.js";
@@ -25,6 +26,7 @@ authRouter.post(
 authRouter.post(
   "/register",
   upload.single("image"),
+  validateImageFile,
   validateUsername,
   validateEmail,
   register

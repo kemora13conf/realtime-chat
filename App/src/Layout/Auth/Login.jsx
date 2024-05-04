@@ -4,8 +4,13 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { loading as GlobalLoading } from "../../Store/Global/index.js";
-import { errors, loading as AuthLoading, login } from "../../Store/Auth/index.js";
+import {
+  errors,
+  loading as AuthLoading,
+  login,
+} from "../../Store/Auth/index.js";
 import Spinner from "../../Components/Spinner.jsx";
+import { toast } from "react-toastify";
 
 const Login = function () {
   const dispatch = useDispatch();
@@ -30,8 +35,11 @@ const Login = function () {
           dispatch(errors({}));
           var expirationDate = new Date();
           expirationDate.setDate(expirationDate.getDate() + 3);
-          document.cookie = `jwt=${encodeURIComponent(res.data.token)};expires=${expirationDate};path=/`;
+          document.cookie = `jwt=${encodeURIComponent(
+            res.data.token
+          )};expires=${expirationDate};path=/`;
           dispatch(login(res.data.user));
+          toast.success(`Welcome Back! ${res.data.user.username}`, { theme: "dark" });
           Navigate("/");
         } else if (res.type == "username") {
           dispatch(errors({ username: res.message }));
@@ -55,10 +63,10 @@ const Login = function () {
     };
   }, []);
   return (
-    <motion.div className="relative w-full min-h-screen flex flex-col justify-center items-center bg-primary-500">
+    <motion.div className="relative w-full min-h-screen flex flex-col justify-center items-center bg-primary-600">
       <motion.form
         onSubmit={handleSubmit(onSubmit)}
-        className="absolute flex flex-col gap-5 max-w-md w-full h-fit p-8 px-10 bg-secondary-600 rounded-lg shadow-md"
+        className="absolute flex flex-col gap-5 max-w-md w-full h-fit p-8 px-10 rounded-lg shadow-md"
       >
         <h1 className="text-2xl font-bold text-tertiary-200 my-4">
           Sign in to your account
@@ -118,7 +126,8 @@ const Login = function () {
         </div>
         <button
           type="submit"
-          className="px-5 py-3 mt-4 flex items-center justify-center gap-3 rounded-md cursor-pointer bg-primary-600 text-tertiary-500"
+          className="px-5 py-3 mt-4 flex items-center justify-center gap-3 rounded-md 
+          cursor-pointer bg-primary-700 text-tertiary-500"
         >
           {auth.loading ? (
             <div className="w-[20px] h-[20px]">

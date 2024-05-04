@@ -40,9 +40,9 @@ const usersSchema = new mongoose.Schema(
       type: String,
       default: "Avatar.png",
     },
-    socket: {
-      type: String,
-      default: "",
+    last_seen: {
+      type: Date,
+      default: new Date(),
     },
   },
   {

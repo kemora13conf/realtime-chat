@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import useMeasure from "react-use-measure";
-import SideBar from "../../Components/SideBar";
+import SideBar from "../../Components/SideBar/SideBar.jsx";
 import { motion } from "framer-motion";
 import ChatContainer from "../../Components/ChatContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { loading as GlobalLoading } from "../../Store/Global/index.js";
-import socketContext from '../../Context/LoadSocket.js'
+import socketContext from "../../Context/LoadSocket.js";
 
 export default function Home() {
   const [ref, bounds] = useMeasure();
@@ -26,14 +26,13 @@ export default function Home() {
     };
   }, []);
   return (
-    <div className="w-full min-h-screen bg-primary-600 flex justify-center items-center">
+    <div className="w-full min-h-screen bg-primary-700 flex justify-center items-center">
       <motion.div
         ref={ref}
-        className="relative w-full max-w-[900px] min-h-[600px] bg-secondary-600 overflow-hidden flex justify-stretch @container/home"
+        className="relative w-full max-w-[1000px] min-h-screen  
+        overflow-hidden flex justify-stretch @container/home"
       >
-        {/* <SideBar parentWidth={bounds.width} /> */}
-        {/* <ChatContainer id={openedChat} /> */}
-        {/* id={'64aad0f6e3037ab7d995f252'} */}
+        <SideBar bounds={bounds} />
       </motion.div>
     </div>
   );

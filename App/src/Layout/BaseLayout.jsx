@@ -14,7 +14,7 @@ function BaseLayout() {
   const Navigate = useNavigate();
 
   const loadCurrentUser = async () => {
-    // get token from cookie
+    dispatch(GlobalLoading(true));
     const token = Cookies.get("jwt");
     if (token) {
       // fetch user data

@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import Cookies from 'js-cookie';
+import { toast } from "react-toastify";
 
 const initialState = {
   isAuthenticated: false,
@@ -34,6 +36,8 @@ const authSlice = createSlice({
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
+      Cookies.remove('jwt');
+      toast.success("Logged out successfully", {theme:'dark'});
     },
     setRegistrationStep: (state, action) => {
       state.registration.step = action.payload;

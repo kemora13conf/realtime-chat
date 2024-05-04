@@ -23,7 +23,7 @@ App.use(cors(corsOptions));
 
 
 // Setting the assets folder
-const __dirname = dirname(fileURLToPath(import.meta.url));
+export const __dirname = dirname(fileURLToPath(import.meta.url));
 App.use(express.static(path.join(__dirname, "./Assets")));
 App.use("/assets", express.static(path.join(__dirname, "/dist/assets")));
 

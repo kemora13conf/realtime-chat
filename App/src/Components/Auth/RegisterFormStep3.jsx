@@ -1,18 +1,27 @@
 import React, { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
+import { setRegistrationData } from "../../Store/Auth/index.js";
 
-function RegisterFormStep3({ register }) {
+function RegisterFormStep3({ register, setImageFileContext }) {
   const auth = useSelector((state) => state.auth);
   const global = useSelector((state) => state.global);
-  const fileRef = useRef(null);
-  const imageRef = useRef(null);
-  const handleChange = (e)=>{
-    console.log("Hello")
-  }
-  useEffect(() => {
-    console.log(fileRef.current)
-  },[fileRef.current])
+  const dispatch = useDispatch();
+
+  const file = useRef(null);
+  const image = useRef(null);
+
+  const handleFileImport = function (event) {
+    const file = event.target.files[0];
+    setImageFileContext(file);
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      image.current.src = event.target.result;
+      dispatch(setRegistrationData({ image: file.name }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 1, x: 0 }}
@@ -54,12 +63,12 @@ function RegisterFormStep3({ register }) {
             flex justify-center items-center relative group cursor-pointer"
           >
             <img
-              ref={imageRef}
+              ref={image}
               src=""
               className={`
                 w-full
                 aspect-square
-                object-cover
+                object-cover rounded-full
                 ${auth.registration.data.image != null ? "block" : "hidden"}
               `}
             />
@@ -69,12 +78,12 @@ function RegisterFormStep3({ register }) {
           </motion.div>
         </label>
         <input
-          ref={fileRef}
-          onChange={handleChange}
           type="file"
           id="image"
           {...register("image", { reauired: true })}
+          ref={file}
           className="hidden"
+          onChange={handleFileImport}
         />
       </div>
     </motion.div>

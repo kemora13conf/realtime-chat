@@ -1,4 +1,5 @@
 import Database from "../Database.js";
+import OnlineUsers from "../Helpers/Online-user.js";
 import { answerObject } from "../Helpers/utils.js";
 import Users from "../Models/Users.js";
 
@@ -13,13 +14,24 @@ async function list (req, res) {
     }
 }
 
-async function onlineOnly (req, res) {
-    const db = await Database.getInstance();
-    // get all the users and return them
+const onlineOnly = async (req, res) => {
     try {
-        // get the users with socket not empty
-        const users = await Users.find({ _id: { $ne: req.user._id } });
-        res.status(200).json(answerObject('success', 'Users found', users));
+        const db = await Database.getInstance();
+        let users = OnlineUsers.getUsers()
+        let usersIds = users.map(user => user.userId);
+        let online_users = await Users.find({ _id: { $in: usersIds } });
+        online_users = online_users.map(user => {
+            return {
+              ...user._doc,
+              socket_id: users.find((u) => u.userId === String(user._id))
+                ?.socketId,
+              online: true,
+            };
+        });
+        console.log(users, online_users)
+        res
+          .status(200)
+          .json(answerObject("success", "Users found", online_users));
     } catch (error) {
         res.status(500).json(answerObject('error', error.message));
     }
