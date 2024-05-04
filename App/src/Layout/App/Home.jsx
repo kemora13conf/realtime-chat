@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import ChatContainer from "../../Components/ChatContainer";
 import { useDispatch, useSelector } from "react-redux";
 import { loading as GlobalLoading } from "../../Store/Global/index.js";
-import socketContext from "../../Components/LoadSocket.js";
+import socketContext from '../../Context/LoadSocket.js'
 
 export default function Home() {
   const [ref, bounds] = useMeasure();
