@@ -4,11 +4,12 @@ import {
   USERS_FILTER,
   setUsersFilter,
   fetchUsers,
-} from "../../Store/Global/index.js";
+  fetchConversations,
+} from "../../Store/Users/index.js";
 
 function FilterButton() {
   const auth = useSelector((state) => state.auth);
-  const global = useSelector((state) => state.global);
+  const users = useSelector((state) => state.users);
   const dispatch = useDispatch();
   return (
     <div
@@ -19,10 +20,10 @@ function FilterButton() {
       <div
         className={`w-[calc(calc(100%/2)-10px)] h-[40px] bg-primary-700 
           absolute top-[5px] left-[5px] rounded-[10px] transition-all duration-300 ease-in-out
-          inside-shadow]`}
+          inside-shadow`}
         style={{
           transform: `translateX(${
-            global.usersFilter === USERS_FILTER.ONLINE
+            users.usersFilter === USERS_FILTER.USERS
               ? "calc(100% + 10px)"
               : "0"
           })`,
@@ -31,21 +32,21 @@ function FilterButton() {
       <div className="w-full flex items-center absolute z-10">
         <button
           onClick={() => {
-            dispatch(setUsersFilter(USERS_FILTER.ALL));
-            dispatch(fetchUsers(USERS_FILTER.ALL));
+            dispatch(setUsersFilter(USERS_FILTER.MESSAGES));
+            dispatch(fetchConversations());
           }}
           className="w-full h-[40px] text-tertiary-500 outline-none border-none"
         >
-          All
+          {USERS_FILTER.MESSAGES}
         </button>
         <button
           onClick={() => {
-            dispatch(setUsersFilter(USERS_FILTER.ONLINE));
-            dispatch(fetchUsers(USERS_FILTER.ONLINE));
+            dispatch(setUsersFilter(USERS_FILTER.USERS));
+            dispatch(fetchUsers());
           }}
           className="w-full h-[40px] text-tertiary-500"
         >
-          Online
+          {USERS_FILTER.USERS}
         </button>
       </div>
     </div>

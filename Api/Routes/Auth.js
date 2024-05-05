@@ -33,7 +33,9 @@ authRouter.post(
 );
 authRouter.post("/login", validateLoginData, login);
 authRouter.get("/verifyToken", requireSingin, (req, res) => {
-  res.status(200).json(answerObject("success", "User Found!", req.user));
+  res
+    .status(200)
+    .json(answerObject("success", "User Found!", req.current_user));
 });
 
 export default authRouter;

@@ -5,13 +5,14 @@ import { useEffect } from "react";
 
 const Protected = () => {
   const auth = useSelector((state) => state.auth);
+  const global = useSelector((state) => state.global);
   const Navigate = useNavigate();
   useEffect(() => {
-    if (!auth.isAuthenticated) {
+    if (!global.loading && !auth.isAuthenticated) {
       Navigate("/login");
     }
   }, [auth.isAuthenticated]);
-  return auth.isAuthenticated ? <Outlet /> : <Login />;
+  return auth.isAuthenticated ? <Outlet /> : null;
 };
 
 export default Protected;

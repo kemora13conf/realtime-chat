@@ -55,15 +55,15 @@ const Login = function () {
       });
   };
   useEffect(() => {
-    if (!global.loading) {
-      dispatch(GlobalLoading(false));
-    }
+    dispatch(GlobalLoading(false));
     return () => {
       dispatch(GlobalLoading(true));
     };
   }, []);
   return (
-    <motion.div className="relative w-full min-h-screen flex flex-col justify-center items-center bg-primary-600">
+    <motion.div
+      key={'Login'}
+      className="relative w-full min-h-screen flex flex-col justify-center items-center bg-primary-600">
       <motion.form
         onSubmit={handleSubmit(onSubmit)}
         className="absolute flex flex-col gap-5 max-w-md w-full h-fit p-8 px-10 rounded-lg shadow-md"

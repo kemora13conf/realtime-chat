@@ -170,7 +170,7 @@ async function requireSingin(req, res, next) {
 
       foundUser.password = undefined;
       if (foundUser) {
-        req.user = foundUser;
+        req.current_user = foundUser;
         next();
       } else {
         res

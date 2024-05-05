@@ -18,16 +18,19 @@ function BaseLayout() {
     const token = Cookies.get("jwt");
     if (token) {
       // fetch user data
-      const response = await fetch(`${import.meta.env.VITE_API}/auth/verifyToken`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API}/auth/verifyToken`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       if (response.ok) {
         const data = await response.json();
-        if (data.type == 'success') {
-          dispatch(login(data.data))
+        if (data.type == "success") {
+          dispatch(login(data.data));
           Navigate("/");
         } else {
           dispatch(logout());
@@ -37,30 +40,34 @@ function BaseLayout() {
       }
     }
     dispatch(GlobalLoading(false));
-  }
+  };
   useEffect(() => {
     loadCurrentUser();
   }, []);
   return (
     <div className="relative ">
       <AnimatePresence mode="wait">
-        {global.loading && (
+        {global.loading ? (
           <motion.div
             initial={{ backdropFilter: "blur(50px)", opacity: 1 }}
             animate={{ backdropFilter: "blur(50px)", opacity: 1 }}
             exit={{ backdropFilter: "blur(0px)", opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full h-screen absolute z-10 top-0 left-0 bg-transparent backdrop-blur-[50px] flex items-center justify-center"
+            key={"Spinner"}
+            className="w-full h-screen absolute z-10 top-0 left-0 
+            bg-primary-500 backdrop-blur-[50px] flex items-center justify-center"
           >
             <div className="w-8 h-8">
               <Spinner />
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
-      <div className="w-full h-auto absolute z-0">
-        <Outlet />
-      </div>
+      {
+        global.loading ? null : (
+          <Outlet />
+        )
+      }
     </div>
   );
 }

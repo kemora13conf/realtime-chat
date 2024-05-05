@@ -3,12 +3,12 @@ import OnlineUsers from "../Helpers/Online-user.js";
 import { answerObject } from "../Helpers/utils.js";
 import Users from "../Models/Users.js";
 
-async function list (req, res) {
+async function list(req, res) {
     const db = await Database.getInstance();
     // get all the users and return them
     try {
-        const user = await Users.find({ _id: { $ne: req.user._id } });
-        res.status(200).json(answerObject('success', 'Users found', user));
+        const users = await Users.find({ _id: { $ne: req.current_user._id } });
+        res.status(200).json(answerObject('success', 'Users found', users));
     } catch (error) {
         res.status(500).json(answerObject('error', error.message));
     }
@@ -42,12 +42,12 @@ async function findUserById (req, res, next, id){
     const db = await Database.getInstance();
     const user = await Users.findById({ _id: id });
     if (user) {
-        req.userById = user;
+        req.user = user;
         next();
     }
 }
 function user (req, res){
-    res.status(200).json(answerObject('success', 'User found', req.userById));
+    res.status(200).json(answerObject('success', 'User found', req.user));
 }
 async function setSocket (req, res){
     const db = await Database.getInstance();

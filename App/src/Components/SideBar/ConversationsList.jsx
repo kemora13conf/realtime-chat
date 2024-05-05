@@ -1,19 +1,11 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import socketContext from "../../Context/LoadSocket.js";
-import {
-  USERS_FILTER,
-  fetchConversations,
-  fetchUsers,
-} from "../../Store/Users/index.js";
-import User from "./User.jsx";
-import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
+import { useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import Conversation from "./Conversation.jsx";
 import UserSkeleton from "../Skeletons/UserSkeleton.jsx";
 
-function UsersList() {
-  const auth = useSelector((state) => state.auth);
+function ConversationsList() {
   const users = useSelector((state) => state.users);
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -22,7 +14,7 @@ function UsersList() {
       transition={{ duration: 0.3 }}
       className="w-full flex flex-col gap-[15px]"
     >
-      {users.isUsersFetching ? (
+      {users.isConversationsFetching ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -33,12 +25,14 @@ function UsersList() {
           <UserSkeleton />
           <UserSkeleton />
         </motion.div>
-      ) : users.users.length > 0 ? (
-        users.users?.map((user) => <User key={user._id} user={user} />)
+      ) : users.conversations.length > 0 ? (
+        users.conversations.map((conversation) => (
+          <Conversation key={conversation._id} conversation={conversation} />
+        ))
       ) : (
         <div className="flex flex-col gap-[5px] p-[10px]">
           <h2 className="text-center text-quaternary-500 font-['Montserrat'] font-light">
-            No Users Yet
+            No Conversations Yet
           </h2>
           <p className="text-center text-tertiary-500 font-['Montserrat'] font-light text-xs">
             Start a conversation with a user to see them here
@@ -49,4 +43,4 @@ function UsersList() {
   );
 }
 
-export default UsersList;
+export default ConversationsList;

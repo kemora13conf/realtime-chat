@@ -129,6 +129,7 @@ const Register = function () {
   }, []);
   return (
     <motion.div
+      key={"Register"}
       className="w-full min-h-screen flex flex-col justify-center items-center 
             bg-primary-600 "
     >

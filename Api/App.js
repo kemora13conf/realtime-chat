@@ -32,12 +32,12 @@ App.use(express.json());
 // Importing the routes
 import authRouter from "./Routes/Auth.js";
 import Users from "./Routes/Users.js";
-import Messages from "./Routes/Messages.js";
+import Conversations from "./Routes/Conversations.js";
 
 // Setting up the routes
 App.use("/api/auth", authRouter);
 App.use("/api/users", Users);
-App.use("/api/messages", Messages);
+App.use("/api/conversations", Conversations);
 
 App.get("*", (req, res) => {
   res.sendFile(path.join(__dirname + "/dist/index.html"));
