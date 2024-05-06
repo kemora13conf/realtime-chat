@@ -27,7 +27,7 @@ function ConversationsList() {
         </motion.div>
       ) : users.conversations.length > 0 ? (
         users.conversations.map((conversation) => (
-          <Conversation key={conversation._id} conversation={conversation} />
+          <Conversation key={conversation.participant._id} conversation={conversation} />
         ))
       ) : (
         <div className="flex flex-col gap-[5px] p-[10px]">

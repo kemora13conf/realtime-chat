@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { loading as GlobalLoading } from "../../Store/Global/index.js";
 import {
   errors,
@@ -11,12 +11,12 @@ import {
 } from "../../Store/Auth/index.js";
 import Spinner from "../../Components/Spinner.jsx";
 import { toast } from "react-toastify";
-
+import SocketContext from '../../Context/LoadSocket.js'
 const Login = function () {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
   const global = useSelector((state) => state.global);
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
 
   const onSubmit = function (data) {
@@ -40,7 +40,13 @@ const Login = function () {
           )};expires=${expirationDate};path=/`;
           dispatch(login(res.data.user));
           toast.success(`Welcome Back! ${res.data.user.username}`, { theme: "dark" });
-          Navigate("/");
+          try {
+            SocketContext.open();
+          } catch (error) {
+            console.error(error);
+          }
+          SocketContext.emit("user-connected", res.data.user._id);
+          navigate("/");
         } else if (res.type == "username") {
           dispatch(errors({ username: res.message }));
         } else if (res.type == "password") {

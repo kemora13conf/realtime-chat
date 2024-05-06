@@ -1,14 +1,15 @@
 import React, { useEffect } from "react";
 import { Manager } from "socket.io-client";
+import Cookies from "js-cookie";
 
-const manager = new Manager(import.meta.env.VITE_SOCKET_URL);
+const manager = new Manager(import.meta.env.VITE_SOCKET_URL,
+    {
+        auth: {
+            token: Cookies.get("jwt"),
+        },
+    }
+);
 
-const socketContext = manager.socket("/");
+const socket = manager.socket("/");
 
-try {
-    socketContext.open();
-} catch (error) {
-    console.error(error);
-}
-
-export default socketContext;
+export default socket;

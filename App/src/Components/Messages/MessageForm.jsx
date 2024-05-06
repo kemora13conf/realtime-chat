@@ -1,33 +1,35 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import socket from "../../Context/LoadSocket.js";
+import { AddMessage } from "../../Store/Chat/index.js";
 
 export default function MessageForm() {
   const currentUser = useSelector((state) => state.auth.user);
   const user = useSelector((state) => state.chat.openedChat.user);
+  const dispatch = useDispatch();
 
   const [msg, setMsg] = useState("");
   function handleSubmit(e) {
     e.preventDefault();
-    fetch(`${import.meta.env.VITE_API}/conversations/${user._id}/message`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bareer ${Cookies.get("jwt")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sender: currentUser._id,
-        receiver: user._id,
-        text: msg,
-      }),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        if (res.type == "success") {
-          //   socket.emit("message", user._id);
-        }
-      });
+    if (msg.trim() === "") return;
+    const token = Cookies.get("jwt");
+    const data = {
+      text: msg,
+      receiver: user._id,
+      sender: currentUser._id,
+    };
+    socket.emit("new-message", { token, data });
+    setMsg("");
   }
+  useEffect(() => {
+    socket.on("new-message", (data) => {
+      dispatch(AddMessage(data));
+    });
+    return () => {
+      socket.off("new-message");
+    };
+  }, []);
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px]">
       <div

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import CurrentUser from "./CurrentUserCard.jsx";
 import Cookies from "js-cookie";
-import socketContext from "../../Context/LoadSocket.js";
 import FilterButton from "./FilterButton.jsx";
 import UsersList from "./UsersList.jsx";
 import { AnimatePresence } from "framer-motion";
@@ -18,12 +17,6 @@ export default function SideBar({ parentWidth }) {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    socketContext.on("new-user", async () => {
-      // Add new User
-    });
-    socketContext.on("user-disconnected", async () => {
-      // remove user
-    });
     dispatch(
       users.usersFilter === USERS_FILTER.USERS
         ? fetchUsers()

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { MONGO_DB } from "./Config/index.js";
+import Logger from "./Helpers/Logger.js";
 
 export default class Database {
   static instance = null;
@@ -9,10 +10,10 @@ export default class Database {
       try {
         const connection = await mongoose.connect(MONGO_DB, {});
         this.instance = connection.connection;
-        console.log("Database connected");
+        Logger.info("=> DB STATE: Database connected");
         return this.instance;
       } catch (err) {
-        console.log("Database connection failed");
+        Logger.error("=> DB STATE:",err.message);
         throw new Error(err.message);
       }
     }

@@ -1,22 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import Home from "./App/Home";
 import { useDispatch, useSelector } from "react-redux";
 import Spinner from "../Components/Spinner";
 import { AnimatePresence, motion } from "framer-motion";
 import Cookies from "js-cookie";
-import { login, logout } from "../Store/Auth/index.js";
+import Auth, { login, logout } from "../Store/Auth/index.js";
 import { loading as GlobalLoading } from "../Store/Global/index.js";
+import SocketContext from "../Context/LoadSocket.js";
 
 function BaseLayout() {
   const global = useSelector((state) => state.global);
+  const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
 
   const loadCurrentUser = async () => {
     dispatch(GlobalLoading(true));
     const token = Cookies.get("jwt");
-    if (token) {
+    if (token != undefined ) {
       // fetch user data
       const response = await fetch(
         `${import.meta.env.VITE_API}/auth/verifyToken`,
@@ -31,14 +33,14 @@ function BaseLayout() {
         const data = await response.json();
         if (data.type == "success") {
           dispatch(login(data.data));
-          Navigate("/");
-        } else {
-          dispatch(logout());
+          SocketContext.emit("user-connected", data.data._id);
+          navigate("/");
+          dispatch(GlobalLoading(false));
+          return;
         }
-      } else {
-        dispatch(logout());
       }
     }
+    navigate("/login");
     dispatch(GlobalLoading(false));
   };
   useEffect(() => {
@@ -63,11 +65,7 @@ function BaseLayout() {
           </motion.div>
         ) : null}
       </AnimatePresence>
-      {
-        global.loading ? null : (
-          <Outlet />
-        )
-      }
+      {!global.loading ? <Outlet /> : null}
     </div>
   );
 }

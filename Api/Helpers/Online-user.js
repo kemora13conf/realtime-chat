@@ -31,4 +31,7 @@ export default class OnlineUsers{
     static getUsers(){
         return this.users;
     }
+    static isOnline(userId){
+        return this.users.some(user => user.userId === userId);
+    }
 }

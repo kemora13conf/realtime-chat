@@ -2,6 +2,11 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import Cookies  from "js-cookie";
 
+export const USER_STATUS = {
+  ONLINE: "online",
+  OFFLINE: "offline",
+};
+
 const initialState = {
   isChatOpen: false,
   isMessagesFetching: false,
@@ -46,8 +51,17 @@ const chatSlice = createSlice({
       state.isMessagesFetching = action.payload;
     },
     AddMessage: (state, action) => {
-      state.openedChat.messages.push(action.payload);
+      // check if the message already exists
+      const message = state.openedChat.messages.find(
+        (msg) => msg._id === action.payload._id
+      );
+      if (!message) {
+        state.openedChat.messages.push(action.payload);
+      }
     },
+    setUserStatus: (state, action) => {
+      state.openedChat.user.status = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -65,6 +79,6 @@ const chatSlice = createSlice({
   },
 });
 
-export const { openChat, closeChat, isMessagesFetching, AddMessage } =
+export const { openChat, closeChat, isMessagesFetching, AddMessage, setUserStatus } =
   chatSlice.actions;
 export default chatSlice.reducer;

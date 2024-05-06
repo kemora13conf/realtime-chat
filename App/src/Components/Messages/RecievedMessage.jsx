@@ -4,9 +4,9 @@ import { motion } from "framer-motion";
 function RecievedMessage({ msg, user }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3 }}
       key={msg._id}
       className="flex gap-4"
@@ -19,7 +19,7 @@ function RecievedMessage({ msg, user }) {
           }`}
         />
       </div>
-      <div className="flex flex-col gap-[5px] max-w-[250px]">
+      <div className="flex flex-col gap-[5px] max-w-[250px] overflow-hidden">
         <div
           className="relative flex flex-col
             rounded-xl bg-secondary-500 shadow-card

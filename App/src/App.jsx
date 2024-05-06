@@ -22,9 +22,9 @@ function App() {
               <Route element={<BaseLayout />}>
                 <Route path="register" element={<Register />} />
                 <Route path="login" element={<Login />} />
-                <Route element={<Protected />}>
-                  <Route index element={<Home />} />
-                </Route>
+                {/* <Route element={<Protected />}> */}
+                {/* </Route> */}
+                <Route index element={<Home />} />
               </Route>
             </Route>
           </Routes>

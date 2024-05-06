@@ -13,10 +13,6 @@ export default function Home() {
   const auth = useSelector((state) => state.auth);
   const global = useSelector((state) => state.global);
 
-  // get the current user from the context
-  useEffect(() => {
-    socketContext.emit("connection-success", auth.user._id);
-  }, []);
   useEffect(() => {
     dispatch(GlobalLoading(false));
     return () => {
@@ -24,19 +20,21 @@ export default function Home() {
     };
   }, []);
   return (
-    <div
-      key={"Home"}
-      className="w-full min-h-screen bg-primary-700 flex justify-center items-center 
-      px-[10px] lg:px-0"
-    >
+    auth.user && (
       <div
-        ref={ref}
-        className="relative w-full max-w-[1000px] min-h-screen  
-        overflow-hidden flex justify-stretch gap-[20px] items-stretch @container/home"
+        key={"Home"}
+        className="w-full min-h-screen bg-primary-700 flex justify-center items-center 
+      px-[10px] lg:px-0"
       >
-        <SideBar bounds={bounds} />
-        <ChatContainer bounds={bounds} />
+        <div
+          ref={ref}
+          className="relative w-full max-w-[1000px] min-h-screen  
+        overflow-hidden flex justify-stretch gap-[20px] items-stretch @container/home"
+        >
+          <SideBar bounds={bounds} />
+          <ChatContainer bounds={bounds} />
+        </div>
       </div>
-    </div>
+    )
   );
 }
