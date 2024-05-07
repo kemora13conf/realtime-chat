@@ -12,6 +12,8 @@ import {
 import Spinner from "../../Components/Spinner.jsx";
 import { toast } from "react-toastify";
 import SocketContext from '../../Context/LoadSocket.js'
+
+
 const Login = function () {
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
@@ -40,12 +42,7 @@ const Login = function () {
           )};expires=${expirationDate};path=/`;
           dispatch(login(res.data.user));
           toast.success(`Welcome Back! ${res.data.user.username}`, { theme: "dark" });
-          try {
-            SocketContext.open();
-          } catch (error) {
-            console.error(error);
-          }
-          SocketContext.emit("user-connected", res.data.user._id);
+          const socket = SocketContext.getSocket();
           navigate("/");
         } else if (res.type == "username") {
           dispatch(errors({ username: res.message }));

@@ -33,7 +33,6 @@ function BaseLayout() {
         const data = await response.json();
         if (data.type == "success") {
           dispatch(login(data.data));
-          SocketContext.emit("user-connected", data.data._id);
           navigate("/");
           dispatch(GlobalLoading(false));
           return;

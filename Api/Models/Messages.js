@@ -23,8 +23,8 @@ const messagesSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    file: {
-      type: String,
+    files: {
+      type: Array,
       default: "",
     },
     image: {

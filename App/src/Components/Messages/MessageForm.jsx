@@ -3,53 +3,107 @@ import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import socket from "../../Context/LoadSocket.js";
 import { AddMessage } from "../../Store/Chat/index.js";
+import { toast } from "react-toastify";
+import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
+import ImageModal from "./imageModal.jsx";
+import FilesModal from "./filesModal.jsx";
+import SocketContext from "../../Context/LoadSocket.js";
 
 export default function MessageForm() {
   const currentUser = useSelector((state) => state.auth.user);
   const user = useSelector((state) => state.chat.openedChat.user);
+  const chatForm = useSelector((state) => state.chatForm);
   const dispatch = useDispatch();
 
   const [msg, setMsg] = useState("");
+  const [files, setFiles] = useState(null);
+  const [image, setImage] = useState(null);
+
+  function importFiles(e) {
+    if (e.target.files.length > 0) {
+      setFiles(e.target.files);
+      dispatch(openFilesModal());
+    }
+  }
+  function importImage(e) {
+    if (e.target.files.length > 0) {
+      setImage(e.target.files[0]);
+      dispatch(openImageModal());
+    }
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     if (msg.trim() === "") return;
-    const token = Cookies.get("jwt");
     const data = {
       text: msg,
       receiver: user._id,
       sender: currentUser._id,
     };
-    socket.emit("new-message", { token, data });
-    setMsg("");
+    if (SocketContext.getSocket().connected) {
+      SocketContext.getSocket().emit("new-message", { data });
+      setMsg("");
+    } else {
+      toast.error("Connection Lost! Please refresh the page", {
+        theme: "dark",
+      });
+    }
   }
   useEffect(() => {
-    socket.on("new-message", (data) => {
+    SocketContext.getSocket().on("new-message", (data) => {
       dispatch(AddMessage(data));
     });
     return () => {
-      socket.off("new-message");
+      SocketContext.getSocket().off("new-message");
     };
   }, []);
   return (
-    <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px]">
+    <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
+      {chatForm.isFilesModalOpen && (
+        <FilesModal files={files} setFiles={setFiles} />
+      )}
+      {chatForm.isImageModalOpen && (
+        <ImageModal image={image} setImage={setImage} />
+      )}
       <div
         className="w-fit h-[48px]
-            flex items-center p-[8px]"
+        flex items-center p-[8px]"
       >
-        <button
+        <label
+          htmlFor="file"
           className="h-full aspect-square flex justify-center items-center
-                    text-tertiary-500 transition-all group hover:text-quaternary-500"
+        text-tertiary-500 transition-all group hover:text-quaternary-500 cursor-pointer"
         >
           <i className="fas fa-paperclip"></i>
-        </button>
-        <button
+          <input
+            className="hidden"
+            type="file"
+            onChange={importFiles}
+            id="file"
+            multiple
+            disabled={chatForm.isFilesModalOpen || chatForm.isImageModalOpen}
+          />
+        </label>
+        <label
+          htmlFor="image"
           className="h-full aspect-square flex justify-center items-center
-                    text-tertiary-500 transition-all group hover:text-quaternary-500"
+        text-tertiary-500 transition-all group hover:text-quaternary-500 cursor-pointer"
         >
           <i className="fas fa-image"></i>
-        </button>
+          <input
+            className="hidden"
+            type="file"
+            accept="image/*"
+            onChange={importImage}
+            id="image"
+            disabled={chatForm.isFilesModalOpen || chatForm.isImageModalOpen}
+          />
+        </label>
       </div>
-      <form onSubmit={handleSubmit} className="w-full flex items-center relative">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full flex items-center relative"
+      >
         <input
           type="text"
           value={msg}
@@ -62,6 +116,7 @@ export default function MessageForm() {
         />
         <button
           type="submit"
+          disabled={chatForm.isFilesModalOpen || chatForm.isImageModalOpen}
           className="w-[48px] h-[48px] rounded-full
             flex justify-center items-center transition-all group
             absolute right-0"

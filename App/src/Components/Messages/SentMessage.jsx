@@ -1,5 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
+import ImagesMessage from "./ImagesMessage.jsx";
+import FilesMessage from "./filesMessage.jsx";
 
 function SentMessage({ msg, user }) {
   return (
@@ -25,9 +27,15 @@ function SentMessage({ msg, user }) {
             rounded-xl bg-primary-700 shadow-card
             px-[15px] py-[12px] min-w-[200px] cursor-pointer"
         >
-          <div className="font-['Montserrat'] text-tertiary-300">
-            {msg.text}
-          </div>
+          {msg.type === "TEXT" ? (
+            <p className="text-quaternary-600 text-[14px] font-light">
+              {msg.text}
+            </p>
+          ) : msg.type === "IMAGE" ? (
+            <ImagesMessage msg={msg} />
+          ) : (
+            <FilesMessage msg={msg} />
+          )}
         </div>
         <div className="flex gap-1 text-tertiary-600 font-light text-[13px] pl-[5px] ml-auto mr-[5px]">
           {new Date(msg.createdAt).toLocaleTimeString()}

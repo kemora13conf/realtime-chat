@@ -6,7 +6,7 @@ export default function Card() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const signOut = () => {
-    SocketContext.disconnect();
+    SocketContext.getSocket().disconnect();
     dispatch(logout());
     navigate("/login");
   };

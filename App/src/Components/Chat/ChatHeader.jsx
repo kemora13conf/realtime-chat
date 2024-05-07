@@ -29,12 +29,12 @@ const ChatHeader = () => {
   };
   useEffect(() => {
     checkUserStatus();
-    SocketContext.on("new-user-connected", (data) => {
+    SocketContext.getSocket().on("new-user-connected", (data) => {
       if (data.userId == user._id) {
         dispatch(setUserStatus(USER_STATUS.ONLINE));
       }
     });
-    SocketContext.on("user-disconnected", (data) => {
+    SocketContext.getSocket().on("user-disconnected", (data) => {
       if (data.userId == user._id) {
         dispatch(setUserStatus(USER_STATUS.OFFLINE));
       }

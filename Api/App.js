@@ -9,7 +9,7 @@ import { CORS_ORIGIN } from "./Config/index.js";
 const App = express();
 
 App.use((req, res, next) => {
-  console.log(`[${req.method}] ==> ${req.url}`)
+  Logger.debug(`[${req.method}] ==> ${req.url}`)
   next();
 })
 
@@ -33,6 +33,7 @@ App.use(express.json());
 import authRouter from "./Routes/Auth.js";
 import Users from "./Routes/Users.js";
 import Conversations from "./Routes/Conversations.js";
+import Logger from "./Helpers/Logger.js";
 
 // Setting up the routes
 App.use("/api/auth", authRouter);
