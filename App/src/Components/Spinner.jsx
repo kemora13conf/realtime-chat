@@ -5,7 +5,7 @@ function Spinner() {
     <div className="w-fit h-fit">
       <svg
         aria-hidden="true"
-        className="w-full h-full text-tertiary-300-200 animate-spin dark:text-gray-600 fill-secondary-600"
+        className="w-full h-full text-tertiary-300-200 animate-spin text-tertiary-600 fill-primary-700"
         viewBox="0 0 100 101"
         xmlns="http://www.w3.org/2000/svg"
       >

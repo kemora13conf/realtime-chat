@@ -11,7 +11,7 @@ export default function Home() {
   const [ref, bounds] = useMeasure();
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const global = useSelector((state) => state.global);
+  const chat = useSelector((state) => state.chat);
 
   useEffect(() => {
     dispatch(GlobalLoading(false));
@@ -19,6 +19,7 @@ export default function Home() {
       dispatch(GlobalLoading(true));
     };
   }, []);
+  
   return (
     auth.user && (
       <div
@@ -28,7 +29,7 @@ export default function Home() {
       >
         <div
           ref={ref}
-          className="relative w-full max-w-[1000px] min-h-screen  
+          className="relative w-full max-w-[1000px] md:min-h-screen  
         overflow-hidden flex justify-stretch gap-[20px] items-stretch @container/home"
         >
           <SideBar bounds={bounds} />

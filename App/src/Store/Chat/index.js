@@ -8,13 +8,26 @@ export const USER_STATUS = {
 };
 
 const initialState = {
-  isChatOpen: false,
+  isLoading: true,
   isMessagesFetching: false,
   openedChat: {
     user: null,
     messages: [],
   },
 };
+
+export const openChat = createAsyncThunk(
+  "chat/openChat",
+  async (id) => {
+    const response = await fetch(`${import.meta.env.VITE_API}/users/${id}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("jwt")}`
+      },
+    });
+    return response.json();
+  }
+);
 
 export const fetchMessages = createAsyncThunk(
   "chat/fetchMessages",
@@ -36,12 +49,8 @@ const chatSlice = createSlice({
   name: "chat",
   initialState,
   reducers: {
-    openChat: (state, action) => {
-      state.isChatOpen = true;
-      state.openedChat.user = action.payload;
-    },
     closeChat: (state) => {
-      state.isChatOpen = false;
+      state.isLoading = true;
       state.openedChat = {
         user: null,
         messages: [],
@@ -61,7 +70,7 @@ const chatSlice = createSlice({
     },
     setUserStatus: (state, action) => {
       state.openedChat.user.status = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -74,11 +83,22 @@ const chatSlice = createSlice({
       })
       .addCase(fetchMessages.rejected, (state) => {
         state.isMessagesFetching = false;
-        toast.error("Failed to fetch messages");
+        toast.error("Failed to fetch messages", {theme: "dark"});
+      })
+      .addCase(openChat.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(openChat.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.openedChat.user = action.payload.data;
+      })
+      .addCase(openChat.rejected, (state) => {
+        state.isLoading = false;
+        toast.error("Failed to fetch user", {theme: "dark"});
       });
   },
 });
 
-export const { openChat, closeChat, isMessagesFetching, AddMessage, setUserStatus } =
+export const { closeChat, isMessagesFetching, AddMessage, setUserStatus } =
   chatSlice.actions;
 export default chatSlice.reducer;

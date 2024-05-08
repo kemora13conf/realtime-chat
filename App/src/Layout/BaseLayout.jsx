@@ -33,7 +33,7 @@ function BaseLayout() {
         const data = await response.json();
         if (data.type == "success") {
           dispatch(login(data.data));
-          navigate("/");
+          navigate(location.pathname);
           dispatch(GlobalLoading(false));
           return;
         }

@@ -125,7 +125,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("new-message-file", async (obj) => {
-    console.log(obj);
     try {
       let { receiver, files } = obj;
       let sender = socket.user;

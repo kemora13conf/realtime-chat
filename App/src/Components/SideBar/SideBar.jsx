@@ -12,8 +12,9 @@ import {
 } from "../../Store/Users/index.js";
 import ConversationsList from "./ConversationsList.jsx";
 
-export default function SideBar({ parentWidth }) {
+export default function SideBar({ bounds }) {
   const users = useSelector((state) => state.users);
+  const chat = useSelector((state) => state.chat);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -25,9 +26,17 @@ export default function SideBar({ parentWidth }) {
   }, []);
   return (
     <div
-      className="w-full max-h-screen flex flex-col items-center gap-5 p-[10px]
+      className={`w-full max-h-screen 
+      ${
+        bounds.width > 720
+          ? "flex"
+        : chat.openedChat.user
+          ? "hidden"
+          : "flex"
+      } 
+      flex-col items-center gap-5 p-[10px]
       transition-all duration-300 ease-in-out
-      @[600px]/home:max-w-[300px]"
+      @[600px]/home:max-w-[300px] `}
     >
       <CurrentUser />
       <FilterButton />

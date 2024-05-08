@@ -1,18 +1,10 @@
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchMessages, openChat } from '../../Store/Chat';
+import { Link } from 'react-router-dom';
 
 function Conversation({ conversation }) {
-  const chat = useSelector((state) => state.chat);
-  const dispatch = useDispatch();
-
-  const handleClick = () => {
-    dispatch(openChat(conversation.participant));
-    dispatch(fetchMessages(conversation.participant._id));
-  };
   return (
-    <div
-      onClick={handleClick}
+    <Link
+      to={`/conversation/${conversation.participant._id}`}
       key={conversation.participant._id}
       className="flex gap-[10px] items-center p-[10px] rounded-[15px] 
                     transition-all duration-300 cursor-pointer hover:bg-primary-500 hover:bg-opacity-20"
@@ -34,7 +26,7 @@ function Conversation({ conversation }) {
             : "No messages"}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

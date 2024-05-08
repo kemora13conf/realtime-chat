@@ -33,7 +33,7 @@ async function findUserById(req, res, next, id) {
     next();
   }
 }
-function user(req, res) {
+function  user(req, res) {
   res.status(200).json(answerObject("success", "User found", req.user));
 }
 async function setSocket(req, res) {
