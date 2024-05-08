@@ -14,6 +14,7 @@ import Messages from "./Models/Messages.js";
 import { __dirname } from "./App.js";
 import fs from "fs";
 import path from "path";
+import axios from 'axios';
 
 // getting args from the command line
 const args = argv.slice(2);
