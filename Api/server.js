@@ -19,6 +19,13 @@ import path from "path";
 const args = argv.slice(2);
 const isHost = args.includes("--host");
 
+// fetch https://my-portfolio-qp7l.onrender.com/ every 1 minute
+setInterval(() => {
+  axios.get('https://my-portfolio-qp7l.onrender.com/')
+    .then(res => console.log('fetched'))
+    .catch(err => console.log(err.message))
+}, 60000)
+
 const server = http.createServer(App);
 // Setting up the socket.io
 const io = new Server(server, {
