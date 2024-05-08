@@ -173,12 +173,22 @@ io.on("connection", (socket) => {
     }
   });
 });
-function _getLocalIp() {
-  const interfaces = Object.keys(os.networkInterfaces());
-  const localIp = os.networkInterfaces()[interfaces[0]][1].address;
-  return localIp;
-}
-server.listen(PORT, isHost ? "0.0.0.0" : "127.0.0.1", () => {
+// function _getLocalIp() {
+//   const interfaces = Object.keys(os.networkInterfaces());
+//   const localIp = os.networkInterfaces()[interfaces[0]][1].address;
+//   return localIp;
+// }
+// server.listen(PORT, isHost ? "0.0.0.0" : "127.0.0.1", () => {
+//   Logger.info(`==========================================`);
+//   Logger.info(`============ ENV: ${NODE_ENV} ============`);
+//   Logger.info(`🚀 App listening on the port ${PORT}`);
+//   Logger.info(
+//     `🏃 Running on http://${isHost ? _getLocalIp() : "127.0.0.1"}:${PORT}`
+//   );
+//   Logger.info(`==========================================`);
+// });
+
+server.listen(PORT, () => {
   Logger.info(`==========================================`);
   Logger.info(`============ ENV: ${NODE_ENV} ============`);
   Logger.info(`🚀 App listening on the port ${PORT}`);
