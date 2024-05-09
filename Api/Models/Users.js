@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import CryptoJS from "crypto-js";
+import bcrypt from 'bcrypt';
 import { JWT_SECRET } from "../Config/index.js";
 
 const { model, models } = mongoose;
@@ -30,11 +31,12 @@ const usersSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    password: {
+    hashed_password: {
       type: String,
       required: true,
-      trim: true,
-      minLength: 6,
+    },
+    salt: {
+      type: String,
     },
     "profile-picture": {
       type: String,
@@ -51,15 +53,16 @@ const usersSchema = new mongoose.Schema(
 );
 
 // Pre-save middleware to encrypt the password
-usersSchema.pre("save", function (next) {
-  if (this.isModified("password")) {
-    this.password = CryptoJS.SHA256(this.password, JWT_SECRET);
+usersSchema.pre("save", async function (next) {
+  if (this.isModified("hashed_password")) {
+    this.salt = await bcrypt.genSalt(10);
+    this.hashed_password = CryptoJS.SHA256(this.hashed_password, this.salt);
   }
   next();
 });
 usersSchema.methods = {
   isPasswordMatch(password) {
-    return CryptoJS.SHA256(password, JWT_SECRET).toString() === this.password;
+    return this.hashed_password === CryptoJS.SHA256(password, this.salt).toString();
   },
 };
 

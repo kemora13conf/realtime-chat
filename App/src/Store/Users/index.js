@@ -54,6 +54,13 @@ const usersSlice = createSlice({
     setUsersFilter: (state, action) => {
       state.usersFilter = action.payload; // Use action.payload here
     },
+    updateLastMessage: (state, action) => {
+      const { conversationId, message } = action.payload;
+      const conversation = state.conversations.find(
+        (conversation) => conversation._id === conversationId
+      );
+      conversation.last_message = message;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -73,7 +80,7 @@ const usersSlice = createSlice({
       })
       .addCase(fetchConversations.fulfilled, (state, action) => {
         state.isConversationsFetching = false;
-        state.conversations = action.payload.data;
+        state.conversations = action.payload.data.conversations;
       })
       .addCase(fetchConversations.rejected, (state) => {
         state.isConversationsFetching = false;
@@ -82,6 +89,10 @@ const usersSlice = createSlice({
   },
 });
 
-export const { isUsersFetching, isConversationsFetching, setUsersFilter } =
-  usersSlice.actions;
+export const {
+  isUsersFetching,
+  isConversationsFetching,
+  setUsersFilter,
+  updateLastMessage,
+} = usersSlice.actions;
 export default usersSlice.reducer;

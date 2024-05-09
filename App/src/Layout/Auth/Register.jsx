@@ -125,6 +125,10 @@ const Register = function () {
     }
     return () => {
       dispatch(GlobalLoading(true));
+      dispatch(setRegistrationStep(1));
+      dispatch(setRegistrationData({}));
+      dispatch(errors({}));
+      setImageFileContext(null);
     };
   }, []);
   return (

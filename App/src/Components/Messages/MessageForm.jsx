@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
-import socket from "../../Context/LoadSocket.js";
-import { AddMessage } from "../../Store/Chat/index.js";
+import { AddMessage, removeMessage } from "../../Store/Chat/index.js";
 import { toast } from "react-toastify";
 import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
 import ImageModal from "./imageModal.jsx";
 import FilesModal from "./filesModal.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
+import { AnimatePresence } from "framer-motion";
 
 export default function MessageForm() {
   const currentUser = useSelector((state) => state.auth.user);
@@ -32,39 +32,57 @@ export default function MessageForm() {
     }
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (msg.trim() === "") return;
     const data = {
       text: msg,
-      receiver: user._id,
-      sender: currentUser._id,
     };
-    if (SocketContext.getSocket().connected) {
-      SocketContext.getSocket().emit("new-message", { data });
-      setMsg("");
+    setMsg("");
+    const response = await fetch(
+      `${import.meta.env.VITE_API}/conversations/${user.username}/message`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${Cookies.get("jwt")}`,
+        },
+        body: JSON.stringify(data),
+      }
+    );
+    if (response.ok) {
+      const res = await response.json();
+      if (res.type == 'success') {
+        dispatch(AddMessage(res.data));
+      }
     } else {
-      toast.error("Connection Lost! Please refresh the page", {
-        theme: "dark",
-      });
+      toast.error("Failed to send message");
     }
+
   }
   useEffect(() => {
-    SocketContext.getSocket().on("new-message", (data) => {
-      dispatch(AddMessage(data));
-    });
-    return () => {
-      SocketContext.getSocket().off("new-message");
-    };
+    if (SocketContext.socket?.connected) {
+      SocketContext.socket.on("new-message", (data) => {
+        dispatch(AddMessage(data));
+      });
+    } else {
+      SocketContext.getSocket().on("connect", () => {
+        SocketContext.socket.on("new-message", (data) => {
+          dispatch(AddMessage(data));
+        });
+      });
+    }
   }, []);
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
-      {chatForm.isFilesModalOpen && (
+      <AnimatePresence mode="out-in">
+        {chatForm.isFilesModalOpen && (
         <FilesModal files={files} setFiles={setFiles} />
       )}
       {chatForm.isImageModalOpen && (
         <ImageModal image={image} setImage={setImage} />
-      )}
+        )}
+      </AnimatePresence>
       <div
         className="w-fit h-[48px]
         flex items-center p-[8px]"

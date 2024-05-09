@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { Manager } from "socket.io-client";
 import Cookies from "js-cookie";
-import { get } from "react-hook-form";
 
 export default class SocketContext {
   static socket = null;

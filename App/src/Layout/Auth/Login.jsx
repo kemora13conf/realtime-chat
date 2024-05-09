@@ -61,6 +61,7 @@ const Login = function () {
     dispatch(GlobalLoading(false));
     return () => {
       dispatch(GlobalLoading(true));
+      dispatch(errors({}));
     };
   }, []);
   return (
