@@ -196,12 +196,12 @@ io.on("connection", (socket) => {
 //   Logger.info(`==========================================`);
 // });
 
-// server.listen(PORT, () => {
-//   Logger.info(`==========================================`);
-//   Logger.info(`============ ENV: ${NODE_ENV} ============`);
-//   Logger.info(`🚀 App listening on the port ${PORT}`);
-//   Logger.info(
-//     `🏃 Running on http://${isHost ? _getLocalIp() : "127.0.0.1"}:${PORT}`
-//   );
-//   Logger.info(`==========================================`);
-// });
+server.listen(PORT, () => {
+  Logger.info(`==========================================`);
+  Logger.info(`============ ENV: ${NODE_ENV} ============`);
+  Logger.info(`🚀 App listening on the port ${PORT}`);
+  Logger.info(
+    `🏃 Running on http://${isHost ? _getLocalIp() : "127.0.0.1"}:${PORT}`
+  );
+  Logger.info(`==========================================`);
+});
