@@ -9,19 +9,6 @@ export const conversations = async (req, res) => {
   try {
     const { current_user } = req;
     const userId = new ObjectId(current_user._id);
-    // const conversations = await Messages.aggregate([
-    //     { $match: { $or: [{ sender: userId }, { receiver: userId }] } },
-    //     {
-    //         $group: {
-    //             _id: "$sender",
-    //             receiver: { $first: "$receiver" },
-    //             text: { $first: "$text" },
-    //             createdAt: { $first: "$createdAt" },
-    //             updatedAt: { $first: "$updatedAt" },
-    //         },
-    //     },
-    //     { $sort: { updatedAt: -1 } },
-    // ]);
     const messages = await Messages.find({
       $or: [{ sender: userId }, { receiver: userId }],
     }).populate("sender receiver", "username last_seen profile-picture");
