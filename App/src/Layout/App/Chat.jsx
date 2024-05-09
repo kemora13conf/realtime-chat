@@ -10,6 +10,7 @@ import RecievedMessageSkeleton from "../../Components/Skeletons/RecievedMessageS
 import { useParams } from "react-router-dom";
 import ChatLoading from "../../Components/Chat/ChatLoading.jsx";
 import { closeChat, fetchMessages, openChat } from "../../Store/Chat/index.js";
+import EmptyChat from "./EmptyChat.jsx";
 
 export default function Chat() {
   const chat = useSelector((state) => state.chat);
@@ -25,16 +26,17 @@ export default function Chat() {
     dispatch(fetchMessages(param.id));
   }, [param.id]);
   useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
+    if (messages.length > 0)
+      chatRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   useEffect(() => {
     return () => {
       dispatch(closeChat());
     };
   }, []);
-  return (
+  return user == null ? (
+    <EmptyChat />
+  ) : (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -44,7 +46,9 @@ export default function Chat() {
       className="w-full flex flex-col items-stretch overflow-y-auto bg-secondary-700
             rounded-[20px] shadow-lg border border-primary-500"
     >
-      {chat.isLoading ? <ChatLoading /> : (
+      {chat.isLoading ? (
+        <ChatLoading />
+      ) : (
         <>
           <ChatHeader />
           <div
@@ -68,7 +72,7 @@ export default function Chat() {
                   </motion.div>
                 ) : (
                   messages.map((message) => {
-                    if (message.sender === currentUser._id) {
+                    if (message.sender._id === currentUser._id) {
                       return (
                         <SentMessage
                           key={message._id}

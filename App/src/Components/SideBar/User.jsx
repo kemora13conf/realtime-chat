@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function User({ user }) {
   return (
     <Link
-      to={`/conversation/${user._id}`}
+      to={`/conversation/${user.username}`}
       key={user._id}
       className="flex gap-[10px] items-center p-[10px] rounded-[15px] 
           transition-all duration-300 cursor-pointer hover:bg-primary-500 hover:bg-opacity-20"

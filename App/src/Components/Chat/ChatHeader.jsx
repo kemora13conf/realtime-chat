@@ -8,7 +8,7 @@ const ChatHeader = () => {
   const user = useSelector((state) => state.chat.openedChat.user);
   const dispatch = useDispatch();
   const checkUserStatus = () => {
-    fetch(`${import.meta.env.VITE_API}/users/${user._id}/status`, {
+    fetch(`${import.meta.env.VITE_API}/users/${user?._id}/status`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${Cookies.get("jwt")}`,
@@ -29,19 +29,34 @@ const ChatHeader = () => {
   };
   useEffect(() => {
     checkUserStatus();
-    SocketContext.getSocket().on("new-user-connected", (data) => {
-      if (data.userId == user._id) {
-        dispatch(setUserStatus(USER_STATUS.ONLINE));
-      }
-    });
-    SocketContext.getSocket().on("user-disconnected", (data) => {
-      if (data.userId == user._id) {
-        dispatch(setUserStatus(USER_STATUS.OFFLINE));
-      }
-    });
+    if (SocketContext.socket?.connected) {
+      SocketContext.socket.on("new-user-connected", (data) => {
+        if (data.userId == user?._id) {
+          dispatch(setUserStatus(USER_STATUS.ONLINE));
+        }
+      });
+      SocketContext.socket.on("user-disconnected", (data) => {
+        if (data.userId == user?._id) {
+          dispatch(setUserStatus(USER_STATUS.OFFLINE));
+        }
+      });
+    } else {
+      SocketContext.getSocket().on("connect", () => {
+        SocketContext.socket.on("new-user-connected", (data) => {
+          if (data.userId == user?._id) {
+            dispatch(setUserStatus(USER_STATUS.ONLINE));
+          }
+        });
+        SocketContext.socket.on("user-disconnected", (data) => {
+          if (data.userId == user?._id) {
+            dispatch(setUserStatus(USER_STATUS.OFFLINE));
+          }
+        });
+      });
+    }
     return () => {};
   }, []);
-  return (
+  return user == null ? null : (
     <div className="w-full h-fit flex items-center p-5 bg-secondary-800 rounded-t-[20px]">
       <img
         src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${

@@ -79,11 +79,7 @@ function saveFile(file, location) {
 
 // Middleware for validating image file upload
 export const validateImageFile = async (req, res, next) => {
-  if (!req.file) {
-    return res
-      .status(200)
-      .json(answerObject("image", "Image file is required"));
-  } else {
+  if (req.file) {
     const { mimetype, size } = req.file;
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
     const maxSize = 1024 * 1024 * 2; // 2MB
@@ -105,14 +101,15 @@ export const validateImageFile = async (req, res, next) => {
 const register = async (req, res) => {
   await Database.getInstance();
   try {
-    let imageName = saveFile(req.file, "Assets/Profile-pictures");
-    const user = await Users.create({
+    const user = new Users({
       username: req.body.username,
       email: req.body.email,
-      password: req.body.password,
-      "profile-picture": imageName,
+      hashed_password: req.body.password,
     });
-    user.save();
+    if (req.file) {
+      user["profile-picture"] = saveFile(req.file, "Assets/Profile-pictures");
+    }
+    await user.save();
     return res
       .status(201)
       .json(answerObject("success", "User created successfully", user));
@@ -123,7 +120,9 @@ const register = async (req, res) => {
 const validateLoginData = async (req, res, next) => {
   try {
     const db = await Database.getInstance();
-    const user = await Users.findOne({ username: req.body.username });
+    const user = await Users.findOne({
+      $or: [{ username: req.body.username }, { email: req.body.username }],
+    });
     if (!user) {
       return res
         .status(200)
@@ -149,7 +148,8 @@ const login = async (req, res) => {
   try {
     await Database.getInstance();
     const token = jwt.sign({ _id: req.user._id }, process.env.JWT_SECRET);
-    req.user.password = undefined;
+    req.user.hashed_password = undefined;
+    req.user.salt = undefined;
     return res.status(200).json(
       answerObject("success", `Logged in successefully!`, {
         user: req.user,
@@ -171,7 +171,8 @@ async function requireSingin(req, res, next) {
 
       const foundUser = await Users.findOne({ _id: userId });
 
-      foundUser.password = undefined;
+      foundUser.hashed_password = undefined;
+      foundUser.salt = undefined;
       if (foundUser) {
         req.current_user = foundUser;
         next();
@@ -186,7 +187,6 @@ async function requireSingin(req, res, next) {
         .json(answerObject("error", "Authentication token missing"));
     }
   } catch (error) {
-    console.log(error.message);
     res.status(401).json({
       error: "Wrong authentication token",
     });

@@ -1,9 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import ImagesMessage from "./ImagesMessage.jsx";
 import FilesMessage from "./filesMessage.jsx";
+import MessageStatus from "./MessageStatus.jsx";
+import { useDispatch } from "react-redux";
+import SocketContext from "../../Context/LoadSocket.js";
 
 function SentMessage({ msg, user }) {
+  const dispatch = useDispatch();
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -37,8 +42,9 @@ function SentMessage({ msg, user }) {
             <FilesMessage msg={msg} />
           )}
         </div>
-        <div className="flex gap-1 text-tertiary-600 font-light text-[13px] pl-[5px] ml-auto mr-[5px]">
+        <div className="flex gap-[10px] text-tertiary-600 font-light text-[13px] pl-[5px] ml-auto mr-[10px]">
           {new Date(msg.createdAt).toLocaleTimeString()}
+          <MessageStatus status={msg.status} />
         </div>
       </div>
     </motion.div>

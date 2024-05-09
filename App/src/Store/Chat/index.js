@@ -1,6 +1,6 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import Cookies  from "js-cookie";
+import Cookies from "js-cookie";
 
 export const USER_STATUS = {
   ONLINE: "online",
@@ -16,18 +16,15 @@ const initialState = {
   },
 };
 
-export const openChat = createAsyncThunk(
-  "chat/openChat",
-  async (id) => {
-    const response = await fetch(`${import.meta.env.VITE_API}/users/${id}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${Cookies.get("jwt")}`
-      },
-    });
-    return response.json();
-  }
-);
+export const openChat = createAsyncThunk("chat/openChat", async (id) => {
+  const response = await fetch(`${import.meta.env.VITE_API}/users/${id}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${Cookies.get("jwt")}`,
+    },
+  });
+  return response.json();
+});
 
 export const fetchMessages = createAsyncThunk(
   "chat/fetchMessages",
@@ -37,7 +34,7 @@ export const fetchMessages = createAsyncThunk(
       {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${Cookies.get("jwt")}`
+          Authorization: `Bearer ${Cookies.get("jwt")}`,
         },
       }
     );
@@ -68,6 +65,11 @@ const chatSlice = createSlice({
         state.openedChat.messages.push(action.payload);
       }
     },
+    removeMessage: (state, action) => {
+      state.openedChat.messages = state.openedChat.messages.filter(
+        (msg) => msg._id !== action.payload._id
+      );
+    },
     setUserStatus: (state, action) => {
       state.openedChat.user.status = action.payload;
     },
@@ -79,26 +81,45 @@ const chatSlice = createSlice({
       })
       .addCase(fetchMessages.fulfilled, (state, action) => {
         state.isMessagesFetching = false;
-        state.openedChat.messages = action.payload.data;
+        if (action.payload.type === "success") {
+          state.openedChat.messages = action.payload.data;
+        } else {
+          toast.error(action.payload.message, { theme: "dark" });
+        }
       })
       .addCase(fetchMessages.rejected, (state) => {
         state.isMessagesFetching = false;
-        toast.error("Failed to fetch messages", {theme: "dark"});
+        toast.error("Failed to fetch messages", { theme: "dark" });
       })
       .addCase(openChat.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(openChat.fulfilled, (state, action) => {
         state.isLoading = false;
+        if (action.payload.type === "error") {
+          state.isLoading = true;
+          state.openedChat = {
+            user: null,
+            messages: [],
+          };
+          toast.error(action.payload.message, { theme: "dark" });
+          return;
+        }
+        action.payload.data.status = USER_STATUS.OFFLINE;
         state.openedChat.user = action.payload.data;
       })
       .addCase(openChat.rejected, (state) => {
         state.isLoading = false;
-        toast.error("Failed to fetch user", {theme: "dark"});
+        toast.error("Failed to fetch user", { theme: "dark" });
       });
   },
 });
 
-export const { closeChat, isMessagesFetching, AddMessage, setUserStatus } =
-  chatSlice.actions;
+export const {
+  closeChat,
+  isMessagesFetching,
+  AddMessage,
+  removeMessage,
+  setUserStatus,
+} = chatSlice.actions;
 export default chatSlice.reducer;
