@@ -9,17 +9,18 @@ import os from "os";
 import { argv } from "process";
 import jwt from "jsonwebtoken";
 import { __dirname } from "./App.js";
+import axios from 'axios';
 
 // getting args from the command line
 const args = argv.slice(2);
 const isHost = args.includes("--host");
 
-// // fetch https://my-portfolio-qp7l.onrender.com/ every 1 minute
-// setInterval(() => {
-//   axios.get('https://my-portfolio-qp7l.onrender.com/')
-//     .then(res => console.log('fetched'))
-//     .catch(err => console.log(err.message))
-// }, 60000)
+// fetch https://my-portfolio-qp7l.onrender.com/ every 1 minute
+setInterval(() => {
+  axios.get('https://my-portfolio-qp7l.onrender.com/')
+    .then(res => console.log('fetched'))
+    .catch(err => console.log(err.message))
+}, 60000)
 
 const server = http.createServer(App);
 // Setting up the socket.io
@@ -73,7 +74,6 @@ io.use(async (socket, next) => {
  * @returns {void} logs the error
  */
 io.on("connection", (socket) => {
-
   /**
    * Listen for disconnect event
    * @listens disconnect
@@ -106,23 +106,13 @@ function _getLocalIp() {
   return localIp;
 }
 
-/**
- * @Server listens on the PORT
- * @description Server listens on the PORT and logs the PORT and IP address
- * @listens PORT
- * @returns {void} logs the PORT and IP address
- */
-server.listen(PORT, isHost ? "0.0.0.0" : "127.0.0.1", () => {
-  Logger.info(`==========================================`);
-  Logger.info(`============ ENV: ${NODE_ENV} ============`);
-  Logger.info(`🚀 App listening on the port ${PORT}`);
-  Logger.info(
-    `🏃 Running on http://${isHost ? _getLocalIp() : "127.0.0.1"}:${PORT}`
-  );
-  Logger.info(`==========================================`);
-});
-
-// server.listen(PORT, () => {
+// /**
+//  * @Server listens on the PORT
+//  * @description Server listens on the PORT and logs the PORT and IP address
+//  * @listens PORT
+//  * @returns {void} logs the PORT and IP address
+//  */
+// server.listen(PORT, isHost ? "0.0.0.0" : "127.0.0.1", () => {
 //   Logger.info(`==========================================`);
 //   Logger.info(`============ ENV: ${NODE_ENV} ============`);
 //   Logger.info(`🚀 App listening on the port ${PORT}`);
@@ -131,3 +121,13 @@ server.listen(PORT, isHost ? "0.0.0.0" : "127.0.0.1", () => {
 //   );
 //   Logger.info(`==========================================`);
 // });
+
+server.listen(PORT, () => {
+  Logger.info(`==========================================`);
+  Logger.info(`============ ENV: ${NODE_ENV} ============`);
+  Logger.info(`🚀 App listening on the port ${PORT}`);
+  Logger.info(
+    `🏃 Running on http://${isHost ? _getLocalIp() : "127.0.0.1"}:${PORT}`
+  );
+  Logger.info(`==========================================`);
+});
