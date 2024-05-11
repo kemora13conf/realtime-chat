@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
-import { AddMessage, removeMessage } from "../../Store/Chat/index.js";
+import { AddMessage } from "../../Store/Chat/index.js";
 import { toast } from "react-toastify";
 import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
 import ImageModal from "./imageModal.jsx";
 import FilesModal from "./filesModal.jsx";
-import SocketContext from "../../Context/LoadSocket.js";
 import { AnimatePresence } from "framer-motion";
 
 export default function MessageForm() {
@@ -60,19 +59,7 @@ export default function MessageForm() {
     }
 
   }
-  useEffect(() => {
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("new-message", (data) => {
-        dispatch(AddMessage(data));
-      });
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.on("new-message", (data) => {
-          dispatch(AddMessage(data));
-        });
-      });
-    }
-  }, []);
+  
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
       <AnimatePresence mode="out-in">

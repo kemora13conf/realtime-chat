@@ -22,13 +22,11 @@ function Conversation({ conversation }) {
     if (SocketContext.socket?.connected) {
       SocketContext.socket.on("new-message", (data) => {
         newMessage(data);
-        console.log(data);
       });
     } else {
       SocketContext.getSocket().on("connect", () => {
         SocketContext.socket.on("new-message", (data) => {
           newMessage(data);
-          console.log(data);
         });
       });
     }

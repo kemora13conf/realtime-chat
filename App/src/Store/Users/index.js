@@ -56,10 +56,22 @@ const usersSlice = createSlice({
     },
     updateLastMessage: (state, action) => {
       const { conversationId, message } = action.payload;
-      const conversation = state.conversations.find(
-        (conversation) => conversation._id === conversationId
-      );
-      conversation.last_message = message;
+      if(conversationId && message) {
+        const conversation = state.conversations.find(
+          (conversation) => conversation._id === conversationId
+        );
+        conversation.last_message = message;
+      }
+    },
+    updateLastMessageStatus: (state, action) => {
+      if (action.payload) {
+        const conversation = state.conversations.find(
+          (conversation) => conversation._id === action.payload.conversation
+        );
+        if (conversation.last_message._id === action.payload._id) {
+          conversation.last_message = action.payload;
+        }
+      }
     },
   },
   extraReducers: (builder) => {
@@ -94,5 +106,6 @@ export const {
   isConversationsFetching,
   setUsersFilter,
   updateLastMessage,
+  updateLastMessageStatus,
 } = usersSlice.actions;
 export default usersSlice.reducer;

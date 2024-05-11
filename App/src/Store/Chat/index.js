@@ -73,6 +73,16 @@ const chatSlice = createSlice({
     setUserStatus: (state, action) => {
       state.openedChat.user.status = action.payload;
     },
+    updateMessageStatus: (state, action) => {
+      if (action.payload) {
+        const message = state.openedChat.messages.find(
+          (msg) => msg._id === action.payload._id
+        );
+        if (message) {
+          message.status = action.payload.status;
+        }
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -121,5 +131,6 @@ export const {
   AddMessage,
   removeMessage,
   setUserStatus,
+  updateMessageStatus,
 } = chatSlice.actions;
 export default chatSlice.reducer;

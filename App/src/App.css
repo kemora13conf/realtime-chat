@@ -69,6 +69,7 @@
   scrollbar-color: rgb(25 18 25 / 1) transparent;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
+  scroll-behavior: smooth;
 }
 body{
   scroll-behavior: smooth;

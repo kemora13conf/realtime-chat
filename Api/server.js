@@ -10,6 +10,7 @@ import { argv } from "process";
 import jwt from "jsonwebtoken";
 import { __dirname } from "./App.js";
 import axios from 'axios';
+import Messages, { MESSAGE_STATUS } from "./Models/Messages.js";
 
 // getting args from the command line
 const args = argv.slice(2);
@@ -24,7 +25,7 @@ setInterval(() => {
 
 const server = http.createServer(App);
 // Setting up the socket.io
-export  const io = new Server(server, {
+export const io = new Server(server, {
   cors: {
     origin: CORS_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -74,6 +75,30 @@ io.use(async (socket, next) => {
  * @returns {void} logs the error
  */
 io.on("connection", (socket) => {
+  socket.on("message-delivered", async (message) => {
+    try {
+      const msg = await Messages.findOne({ _id: message._id });
+      await msg.populate("sender receiver");
+      msg.status = MESSAGE_STATUS.DELIVERED;
+      await msg.save();
+      // console.log("message delivered", msg);
+      io.to(String(msg.sender._id)).emit("message-delivered", msg);
+    } catch (error) {
+      console.log(error.message);
+    }
+  });
+  socket.on("message-seen", async (message) => {
+    try {
+      const msg = await Messages.findOne({ _id: message._id });
+      await msg.populate("sender receiver");
+      msg.status = MESSAGE_STATUS.SEEN;
+      await msg.save();
+      // console.log("message seen", msg);
+      io.to(String(msg.sender._id)).emit("message-seen", msg);
+    } catch (error) {
+      console.log(error.message);
+    }
+  });
 
   /**
    * Listen for disconnect event
@@ -85,7 +110,9 @@ io.on("connection", (socket) => {
     try {
       socket.user.last_seen = new Date();
       await socket.user.save();
-      socket.broadcast.emit("user-disconnected", { userId: String(socket.user._id) });
+      socket.broadcast.emit("user-disconnected", {
+        userId: String(socket.user._id),
+      });
       Logger.info(`A user disconnected ${socket.id} ${socket.user.username}`);
 
       // leave the room

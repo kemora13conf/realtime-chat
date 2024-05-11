@@ -1,7 +1,7 @@
 import Database from "../Database.js";
 import { answerObject } from "../Helpers/utils.js";
 import Conversations from "../Models/Conversations.js";
-import Messages from "../Models/Messages.js";
+import Messages, { MESSAGE_STATUS } from "../Models/Messages.js";
 import Users from "../Models/Users.js";
 import { ObjectId } from "mongodb";
 import { io } from "../server.js";
@@ -99,6 +99,27 @@ export const conversations = async (req, res) => {
     const totalDocs = await Conversations.countDocuments({
       $or: [{ startedBy: userId }, { to: userId }],
     });
+
+    /**
+     * loading these conversation mean the current user 
+     * is received the messages in those conversations
+     * but he didn't see them yet. So we gonna change the 
+     * status of the messages to SEEN
+     */
+    for (let conversation of conversations) {
+      const messages = await Messages.find({
+        conversation: conversation._id,
+        receiver: userId,
+        status: MESSAGE_STATUS.SENT,
+      });
+      for (let message of messages) {
+        message.status = MESSAGE_STATUS.DELIVERED;
+        await message.save();
+        await message.populate("sender", "username profile-picture");
+        await message.populate("receiver", "username profile-picture");
+        io.to(String(message.sender._id)).emit("message-delivered", message);
+      }
+    }
 
     return res.status(200).json(
       answerObject("success", "Conversations fetched successfully", {
