@@ -1,6 +1,6 @@
 import ChatHeader from "../../Components/Chat/ChatHeader.jsx";
 import MessageForm from "../../Components/Messages/MessageForm.jsx";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import SentMessage from "../../Components/Messages/SentMessage.jsx";
@@ -9,8 +9,14 @@ import SentMessageSkeleton from "../../Components/Skeletons/SentMessageSkeleton.
 import RecievedMessageSkeleton from "../../Components/Skeletons/RecievedMessageSkeleton.jsx";
 import { useParams } from "react-router-dom";
 import ChatLoading from "../../Components/Chat/ChatLoading.jsx";
-import { closeChat, fetchMessages, openChat } from "../../Store/Chat/index.js";
+import {
+  AddMessage,
+  closeChat,
+  fetchMessages,
+  openChat,
+} from "../../Store/Chat/index.js";
 import EmptyChat from "./EmptyChat.jsx";
+import SocketContext from "../../Context/LoadSocket.js";
 
 export default function Chat() {
   const chat = useSelector((state) => state.chat);
@@ -25,11 +31,29 @@ export default function Chat() {
     dispatch(openChat(param.id));
     dispatch(fetchMessages(param.id));
   }, [param.id]);
+
   useEffect(() => {
-    if (messages.length > 0)
-      chatRef.current.scrollIntoView({ behavior: "smooth" });
+    if (chatRef.current) {
+      /**
+       * We must scroll the down to show the last message.
+       * that will happen by scroll the chatRef in Y axis by the Height of it first child
+       */
+      chatRef.current.scrollTo(0, chatRef.current.children[0].offsetHeight);
+    }
   }, [messages]);
+
   useEffect(() => {
+    if (SocketContext.socket?.connected) {
+      SocketContext.socket.on("new-message", (message) => {
+        dispatch(AddMessage(message));
+      });
+    } else {
+      SocketContext.getSocket().on("connect", () => {
+        SocketContext.socket.on("new-message", (message) => {
+          dispatch(AddMessage(message));
+        });
+      });
+    }
     return () => {
       dispatch(closeChat());
     };

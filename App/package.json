@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "cross-env NODE_ENV='production' vite build",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -13,6 +13,7 @@
     "@reduxjs/toolkit": "^2.2.3",
     "@tailwindcss/container-queries": "^0.1.1",
     "autoprefixer": "^10.4.14",
+    "cross-env": "^7.0.3",
     "framer-motion": "^10.12.18",
     "js-cookie": "^3.0.5",
     "multer": "^1.4.5-lts.1",

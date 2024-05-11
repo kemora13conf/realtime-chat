@@ -10,7 +10,7 @@ import Store from "./Store/Store.js";
 import Protected from "./Components/Protection/ProtectedRoute.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import EmptyChat from './Layout/App/EmptyChat.jsx';
+import EmptyChat from "./Layout/App/EmptyChat.jsx";
 import Chat from "./Layout/App/Chat.jsx";
 
 function App() {
@@ -24,9 +24,11 @@ function App() {
               <Route element={<BaseLayout />}>
                 <Route path="register" element={<Register />} />
                 <Route path="login" element={<Login />} />
-                <Route element={<Home />} >
+                <Route element={<Home />}>
                   <Route index element={<EmptyChat />} />
                   <Route path="conversation/:id" element={<Chat />} />
+
+                  <Route path="*" element={<EmptyChat />} />
                 </Route>
               </Route>
             </Route>
