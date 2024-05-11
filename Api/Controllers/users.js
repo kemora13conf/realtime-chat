@@ -1,6 +1,7 @@
 import Database from "../Database.js";
 import Logger from "../Helpers/Logger.js";
 import { answerObject } from "../Helpers/utils.js";
+import Conversations from "../Models/Conversations.js";
 import Users from "../Models/Users.js";
 import { io } from "../server.js";
 
@@ -19,7 +20,9 @@ export const isUserOnline = async (req, res) => {
   try {
     await Database.getInstance();
     const { user } = req;
-    const online = io.sockets.adapter.rooms.get(String(user._id)) ? true : false;
+    const online = io.sockets.adapter.rooms.get(String(user._id))
+      ? true
+      : false;
     res.status(200).json(answerObject("success", "User found", { online }));
   } catch (error) {
     res.status(500).json(answerObject("error", error.message));
@@ -48,11 +51,39 @@ export async function findUserById(req, res, next, id) {
     res.status(500).json(answerObject("error", error.message));
   }
 }
-export function user(req, res) {
+export async function user(req, res) {
   try {
+    /**
+     * Get the conversation between the current user and the user
+     */
+    let conversation = await Conversations.findOne({
+      $or: [
+        { startedBy: req.current_user._id, to: req.user._id },
+        { startedBy: req.user._id, to: req.current_user._id },
+      ],
+    })
+
+    if (!conversation) {
+      conversation = await Conversations.create({
+        startedBy: req.current_user._id,
+        to: req.user._id,
+      });
+    }
+
+    await conversation.populate({
+      path: "last_message",
+      populate: {
+        path: "sender receiver",
+        select: "username profile-picture last_seen",
+      },
+    });
+
+    req.user = {
+      ...req.user._doc,
+      conversation: conversation,
+    };
     res.status(200).json(answerObject("success", "User found", req.user));
   } catch (error) {
     res.status(500).json(answerObject("error", error.message));
   }
 }
-

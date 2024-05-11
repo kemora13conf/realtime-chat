@@ -12,12 +12,12 @@ function ConversationsList() {
   const dispatch = useDispatch();
   useEffect(() => {
     if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("message-delivered", (message) => {
-        dispatch(updateLastMessageStatus(message));
-        if (message.receiver._id == currentUser._id) {
-          SocketContext.socket.emit("message-delivered", message);
-        }
-      });
+        SocketContext.socket.on("message-delivered", (message) => {
+          dispatch(updateLastMessageStatus(message));
+          if (message.receiver._id == currentUser._id) {
+            SocketContext.socket.emit("message-delivered", message);
+          }
+        });
 
       SocketContext.socket.on("message-seen", (message) => {
         dispatch(updateLastMessageStatus(message));

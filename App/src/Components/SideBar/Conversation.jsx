@@ -13,24 +13,7 @@ function Conversation({ conversation }) {
     conversation.startedBy._id === currentUser._id
       ? conversation.to
       : conversation.startedBy;
-  const newMessage = (msg) => {
-    if(conversation._id === msg.conversation){
-      dispatch(updateLastMessage({ conversationId: conversation._id, message: msg }));
-    }
-  }
-  useEffect(() => {
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("new-message", (data) => {
-        newMessage(data);
-      });
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.on("new-message", (data) => {
-          newMessage(data);
-        });
-      });
-    }
-  }, []);
+  
   return (
     <Link
       to={`/conversation/${participant.username}`}

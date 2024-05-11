@@ -43,17 +43,6 @@ export default function Chat() {
   }, [messages]);
 
   useEffect(() => {
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("new-message", (message) => {
-        dispatch(AddMessage(message));
-      });
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.on("new-message", (message) => {
-          dispatch(AddMessage(message));
-        });
-      });
-    }
     return () => {
       dispatch(closeChat());
     };

@@ -11,8 +11,9 @@ const initialState = {
   isLoading: true,
   isMessagesFetching: false,
   openedChat: {
-    user: null,
+    user: null, // the user with whom the chat is opened 
     messages: [],
+    conversation: null, // the conversation with the user
   },
 };
 
@@ -106,7 +107,7 @@ const chatSlice = createSlice({
       })
       .addCase(openChat.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload.type === "error") {
+        if (action.payload.type != "success") {
           state.isLoading = true;
           state.openedChat = {
             user: null,
@@ -117,6 +118,7 @@ const chatSlice = createSlice({
         }
         action.payload.data.status = USER_STATUS.OFFLINE;
         state.openedChat.user = action.payload.data;
+        state.openedChat.conversation = action.payload.data.conversation;
       })
       .addCase(openChat.rejected, (state) => {
         state.isLoading = false;
