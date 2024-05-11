@@ -77,10 +77,12 @@ io.on("connection", (socket) => {
   socket.on("message-delivered", async (message) => {
     try {
       const msg = await Messages.findOne({ _id: message._id });
-      await msg.populate("sender receiver");
       msg.status = MESSAGE_STATUS.DELIVERED;
       await msg.save();
-      // console.log("message delivered", msg);
+
+      await msg.populate("sender", "username profile-picture");
+      await msg.populate("receiver", "username profile-picture");
+
       io.to(String(msg.sender._id)).emit("message-delivered", msg);
     } catch (error) {
       console.log(error.message);
@@ -89,11 +91,14 @@ io.on("connection", (socket) => {
   socket.on("message-seen", async (message) => {
     try {
       const msg = await Messages.findOne({ _id: message._id });
-      await msg.populate("sender receiver");
       msg.status = MESSAGE_STATUS.SEEN;
       await msg.save();
-      // console.log("message seen", msg);
+
+      await msg.populate("sender", "username profile-picture");
+      await msg.populate("receiver", "username profile-picture");
+
       io.to(String(msg.sender._id)).emit("message-seen", msg);
+      io.to(String(msg.receiver._id)).emit("message-seen", msg);
     } catch (error) {
       console.log(error.message);
     }

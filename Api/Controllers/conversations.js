@@ -247,7 +247,7 @@ export const new_message = async (req, res) => {
     await conversation.save();
 
     io.to(receiver._id.toString()).emit("new-message", message);
-    io.to(current_user._id.toString()).emit("new-message", message);
+    // io.to(current_user._id.toString()).emit("new-message", message);
     return res
       .status(200)
       .json(answerObject("success", "Message sent successfully", message));

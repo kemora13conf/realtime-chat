@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import LastMessage from "../Messages/LastMessage.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
 import { updateLastMessage } from "../../Store/Users/index.js";
+import UnreadMesssages from "./UnreadMesssages.jsx";
 
 function Conversation({ conversation }) {
   const currentUser = useSelector((state) => state.auth.user);
@@ -13,13 +14,22 @@ function Conversation({ conversation }) {
     conversation.startedBy._id === currentUser._id
       ? conversation.to
       : conversation.startedBy;
-  
+
+  const amIlastMessageSender =
+    conversation.last_message.sender._id === currentUser._id;
+  const isLastMessageSeen = conversation.last_message.status === "SEEN";
+
   return (
     <Link
       to={`/conversation/${participant.username}`}
       key={participant._id}
-      className="flex gap-[10px] items-center p-[10px] rounded-[15px] 
-                    transition-all duration-300 cursor-pointer hover:bg-primary-500 hover:bg-opacity-20"
+      className={`flex gap-[10px] items-center p-[10px] rounded-[15px] 
+                transition-all duration-300 cursor-pointer hover:bg-primary-500 hover:bg-opacity-20
+                relative ${
+                  !amIlastMessageSender && !isLastMessageSeen
+                    ? "bg-tertiary-700 bg-opacity-20"
+                    : ""
+                }`}
     >
       <img
         src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${
@@ -35,6 +45,9 @@ function Conversation({ conversation }) {
           <LastMessage message={conversation.last_message} />
         </div>
       </div>
+      {!amIlastMessageSender && !isLastMessageSeen && (
+        <UnreadMesssages conversationId={conversation._id} />
+      )}
     </Link>
   );
 }

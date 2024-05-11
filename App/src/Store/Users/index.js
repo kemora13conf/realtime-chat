@@ -63,15 +63,23 @@ const usersSlice = createSlice({
         conversation.last_message = message;
       }
     },
+    MoveToTop: (state, action) => {
+      const message = action.payload;
+      const conversation = state.conversations.find(
+        (conversation) => conversation._id === message.conversation
+      );
+      state.conversations = state.conversations.filter(
+        (conversation) => conversation._id !== message.conversation
+      );
+      state.conversations.unshift(conversation);
+    },
     updateLastMessageStatus: (state, action) => {
       const message = action.payload;
       if (message) {
         const conversation = state.conversations.find(
           (conversation) => conversation._id === message.conversation
         );
-        if (conversation.last_message._id === message._id) {
-          conversation.last_message = message;
-        }
+        conversation.last_message = message;
       }
     },
   },
@@ -108,5 +116,6 @@ export const {
   setUsersFilter,
   updateLastMessage,
   updateLastMessageStatus,
+  MoveToTop,
 } = usersSlice.actions;
 export default usersSlice.reducer;
