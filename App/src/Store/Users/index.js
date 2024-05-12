@@ -55,21 +55,38 @@ const usersSlice = createSlice({
       state.usersFilter = action.payload; // Use action.payload here
     },
     updateLastMessage: (state, action) => {
-      const { conversationId, message } = action.payload;
-      if(conversationId && message) {
+      const message = action.payload;
+      if (message) {
         const conversation = state.conversations.find(
-          (conversation) => conversation._id === conversationId
+          (conversation) => conversation._id === message.conversation
         );
-        conversation.last_message = message;
+        if (conversation) {
+          conversation.last_message = message;
+        }
+      }
+    },
+    MoveToTop: (state, action) => {
+      const converationId = action.payload;
+      const conversation = state.conversations.find(
+        (conversation) => conversation._id === converationId
+      );
+      if (conversation) {
+        state.conversations = state.conversations.filter(
+          (conversation) => conversation._id !== converationId
+        );
+        state.conversations.unshift(conversation);
       }
     },
     updateLastMessageStatus: (state, action) => {
-      if (action.payload) {
+      const message = action.payload;
+      if (message) {
         const conversation = state.conversations.find(
-          (conversation) => conversation._id === action.payload.conversation
+          (conversation) => conversation._id === message.conversation
         );
-        if (conversation.last_message._id === action.payload._id) {
-          conversation.last_message = action.payload;
+        if(conversation && conversation.last_message._id === message._id){
+          if (conversation.last_message.status !== 'SEEN') {
+            conversation.last_message.status = message.status;
+          }
         }
       }
     },
@@ -107,5 +124,6 @@ export const {
   setUsersFilter,
   updateLastMessage,
   updateLastMessageStatus,
+  MoveToTop,
 } = usersSlice.actions;
 export default usersSlice.reducer;

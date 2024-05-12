@@ -4,7 +4,7 @@ function ImagesMessage({ msg }) {
   return (
     <div className="w-[200px] h-[200px] relative">
       <img
-        src={`${import.meta.env.VITE_ASSETS}/Messages-files/${msg.image}`}
+        src={`data:${msg.content.contentType};base64,${msg.content[0].message}`}
         alt="message"
         className="w-full h-full object-cover rounded-[5px]"
       />
@@ -13,14 +13,18 @@ function ImagesMessage({ msg }) {
                 backdrop-blur-md rounded-md shadow-card"
       >
         <a
-          href={`${import.meta.env.VITE_ASSETS}/Messages-files/${msg.image}`}
+          href={`${import.meta.env.VITE_API}/conversations/Messages-files/${
+            msg.content[0]._id
+          }`}
           download
           className="text-quaternary-600 text-[12px] font-light flex items-center gap-[10px] py-[5px] px-[10px]"
         >
-          <i className="fas fa-download"></i>{" "}
-          {msg.image.substring(0, 5) +
-            "..." +
-            msg.image.substring(msg.image.length - 5, msg.image.length)}
+          <i className="fas fa-download"></i>
+          {msg.content[0].fileName.length > 20
+            ? msg.content[0].fileName.substring(0, 17) +
+              "..." +
+              msg.content[0].fileName.slice(-3)
+            : msg.content[0].fileName}
         </a>
       </div>
     </div>

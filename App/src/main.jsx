@@ -4,8 +4,4 @@ import App from './App.jsx'
 import './index.css'
 import './assets/fontawesome/css/all.css'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);

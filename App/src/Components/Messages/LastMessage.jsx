@@ -12,28 +12,28 @@ function LastMessage({ message }) {
   
   return message ? (
     <div className="flex gap-[5px] items-center">
-      {
-        user._id == message.sender._id ? (<MessageStatus status={message.status} />) : null
-      }
+      {user._id == message.sender._id ? (
+        <MessageStatus status={message.status} />
+      ) : null}
       {message.type === TYPES.TEXT && (
         <span className="text-tertiary-500 font-['Montserrat'] font-light">
-          {message.text}
+          {message.content[0].message}
         </span>
       )}
       {message.type === TYPES.IMAGE && (
         <span className="text-tertiary-500 font-['Montserrat'] font-light flex items-center gap-[10px]">
           <i className="fas fa-image"></i>
-          {
-            message.image.length > 20
-              ? message.image.substring(0, 17) + "..." + message.image.slice(-3)
-              : message.image
-          }
+          {message.content[0].fileName.length > 20
+            ? message.content[0].fileName.substring(0, 17) +
+              "..." +
+              message.content[0].fileName.slice(-3)
+            : message.content[0].fileName}
         </span>
       )}
       {message.type === TYPES.FILE && (
         <span className="text-tertiary-500 font-['Montserrat'] font-light flex items-center gap-[10px]">
           <i className="fas fa-paperclip"></i>
-          {message.files.length} files
+          {message.content.length} files
         </span>
       )}
     </div>

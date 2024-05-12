@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { conversationById, conversations, findReceiverById, messages, new_message, new_message_image, new_message_files, upload } from '../Controllers/conversations.js';
+import { conversationById, conversations, findReceiverById, messages, new_message, new_message_image, new_message_files, upload, unread_messages } from '../Controllers/conversations.js';
 import { requireSingin } from '../Controllers/auth.js';
 
 
@@ -10,8 +10,10 @@ router.param('username', findReceiverById);
 
 router.get('/', requireSingin, conversations)
 router.get('/:username/messages', requireSingin, messages);
+router.get("/:id/unread", requireSingin, unread_messages);
 router.post('/:username/message', requireSingin, new_message);
 router.post('/:username/message/image', requireSingin, upload.single('image'), new_message_image);
 router.post('/:username/message/files', requireSingin, upload.array('files'), new_message_files);
+
 
 export default router;

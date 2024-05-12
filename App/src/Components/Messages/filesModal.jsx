@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { AddMessage } from "../../Store/Chat/index.js";
 import { motion } from "framer-motion";
+import { MoveToTop, updateLastMessage } from "../../Store/Users/index.js";
 
 function FilesModal({ files, setFiles }) {
   const user = useSelector((state) => state.chat.openedChat.user);
@@ -33,6 +34,8 @@ function FilesModal({ files, setFiles }) {
       const res = await response.json();
       if (res.type == "success") {
         dispatch(AddMessage(res.data));
+        dispatch(updateLastMessage(res.data));
+        dispatch(MoveToTop(res.data.conversation));
         setFiles(null);
         dispatch(closeFilesModal());
       }

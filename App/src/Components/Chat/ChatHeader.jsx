@@ -27,35 +27,39 @@ const ChatHeader = () => {
         console.error("Error:", error);
       });
   };
-  useEffect(() => {
-    checkUserStatus();
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("new-user-connected", (data) => {
-        if (data.userId == user?._id) {
-          dispatch(setUserStatus(USER_STATUS.ONLINE));
-        }
-      });
-      SocketContext.socket.on("user-disconnected", (data) => {
-        if (data.userId == user?._id) {
-          dispatch(setUserStatus(USER_STATUS.OFFLINE));
-        }
-      });
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.on("new-user-connected", (data) => {
-          if (data.userId == user?._id) {
-            dispatch(setUserStatus(USER_STATUS.ONLINE));
-          }
-        });
-        SocketContext.socket.on("user-disconnected", (data) => {
-          if (data.userId == user?._id) {
-            dispatch(setUserStatus(USER_STATUS.OFFLINE));
-          }
-        });
-      });
+  const onNewUserConnected = (data) => {
+    if (data.userId == user?._id) {
+      dispatch(setUserStatus(USER_STATUS.ONLINE));
     }
-    return () => {};
+  };
+  const onUserDisconnected = (data) => {
+    if (data.userId == user?._id) {
+      dispatch(setUserStatus(USER_STATUS.OFFLINE));
+    }
+  }
+
+  const onConnect = () => {
+    SocketContext.socket.on("new-user-connected", onNewUserConnected);
+    SocketContext.socket.on("user-disconnected", onUserDisconnected);
+  }
+
+  useEffect(() => {
+    if (user) {
+      checkUserStatus();
+      if (SocketContext.socket && SocketContext.socket.connected) {
+        onConnect();
+      } else {
+        SocketContext.getSocket().on("connect", onConnect);
+      }
+    }
+    return () => {
+      if(SocketContext.socket && SocketContext.socket.connected) {
+        SocketContext.socket.off("new-user-connected", onNewUserConnected);
+        SocketContext.socket.off("user-disconnected", onUserDisconnected);
+      }
+    };
   }, []);
+  
   return user == null ? null : (
     <div className="w-full h-fit flex items-center p-5 bg-secondary-800 rounded-t-[20px]">
       <img

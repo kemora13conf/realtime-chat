@@ -1,40 +1,18 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import ImagesMessage from "./ImagesMessage.jsx";
 import FilesMessage from "./filesMessage.jsx";
 import MessageStatus from "./MessageStatus.jsx";
-import { useDispatch } from "react-redux";
-import SocketContext from "../../Context/LoadSocket.js";
-import { updateMessageStatus } from "../../Store/Chat/index.js";
 
 function SentMessage({ msg, user }) {
-  const dispatch = useDispatch();
-  useEffect(() => {
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("message-delivered", (message) => {
-        dispatch(updateMessageStatus(message));
-      });
-      SocketContext.socket.on("message-seen", (message) => {
-        dispatch(updateMessageStatus(message));
-      });
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.on("message-delivered", (message) => {
-          dispatch(updateMessageStatus(message));
-        });
-        SocketContext.socket.on("message-seen", (message) => {
-          dispatch(updateMessageStatus(message));
-        });
-      });
-    }
-  });
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3 }}
-      key={msg._id}
+      key={msg._id + msg.status}
       className="flex gap-4 flex-row-reverse ml-auto"
     >
       <div className="h-[40px] aspect-square rounded-full bg-primary-500">
@@ -53,7 +31,7 @@ function SentMessage({ msg, user }) {
         >
           {msg.type === "TEXT" ? (
             <p className="text-quaternary-600 text-[14px] font-light">
-              {msg.text}
+              {msg.content[0].message}
             </p>
           ) : msg.type === "IMAGE" ? (
             <ImagesMessage msg={msg} />

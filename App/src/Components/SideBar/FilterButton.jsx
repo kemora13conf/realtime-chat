@@ -14,7 +14,7 @@ function FilterButton() {
   return (
     <div
       className="w-full rounded-[15px] py-[5px]
-                bg-primary-500 relative h-[50px] shadow-card"
+                bg-primary-500 relative min-h-[50px] shadow-card"
     >
       {/* indicator */}
       <div

@@ -2,19 +2,9 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import ImagesMessage from "./ImagesMessage";
 import FilesMessage from "./filesMessage";
-import SocketContext from "../../Context/LoadSocket";
 
 function RecievedMessage({ msg, user }) {
-
-  useEffect(() => {
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.emit("message-seen", msg)
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.emit("message-seen", msg);
-      });
-    }
-  }, []);
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -40,7 +30,7 @@ function RecievedMessage({ msg, user }) {
         >
           {msg.type === "TEXT" ? (
             <p className="text-quaternary-600 text-[14px] font-light">
-              {msg.text}
+              {msg.content[0].message}
             </p>
           ) : msg.type === "IMAGE" ? (
             <ImagesMessage msg={msg} />

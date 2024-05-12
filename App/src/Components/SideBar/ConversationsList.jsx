@@ -1,42 +1,12 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import Conversation from "./Conversation.jsx";
 import UserSkeleton from "../Skeletons/UserSkeleton.jsx";
-import SocketContext from "../../Context/LoadSocket.js";
-import { updateLastMessageStatus } from "../../Store/Users/index.js";
+import { useSelector } from "react-redux";
 
 function ConversationsList() {
   const users = useSelector((state) => state.users);
-  const currentUser = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    if (SocketContext.socket?.connected) {
-      SocketContext.socket.on("message-delivered", (message) => {
-        dispatch(updateLastMessageStatus(message));
-        if (message.receiver._id == currentUser._id) {
-          SocketContext.socket.emit("message-delivered", message);
-        }
-      });
-
-      SocketContext.socket.on("message-seen", (message) => {
-        dispatch(updateLastMessageStatus(message));
-      });
-    } else {
-      SocketContext.getSocket().on("connect", () => {
-        SocketContext.socket.on("message-delivered", (message) => {
-          dispatch(updateLastMessageStatus(message));
-          if (message.receiver._id == currentUser._id) {
-            SocketContext.socket.emit("message-delivered", message);
-          }
-        });
-
-        SocketContext.socket.on("message-seen", (message) => {
-          dispatch(updateLastMessageStatus(message));
-        });
-      });
-    }
-  });
+  
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -58,7 +28,14 @@ function ConversationsList() {
         </motion.div>
       ) : users.conversations.length > 0 ? (
         users.conversations.map((conversation) => (
-          <Conversation key={conversation._id} conversation={conversation} />
+          <Conversation
+            key={
+              conversation.last_message
+                ? conversation.last_message.updatedAt
+                : conversation._id
+            }
+            conversation={conversation}
+          />
         ))
       ) : (
         <div className="flex flex-col gap-[5px] p-[10px]">
