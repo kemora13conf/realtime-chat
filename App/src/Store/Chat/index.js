@@ -11,7 +11,7 @@ const initialState = {
   isLoading: true,
   isMessagesFetching: false,
   openedChat: {
-    user: null, // the user with whom the chat is opened 
+    user: null, // the user with whom the chat is opened
     messages: [],
   },
 };
@@ -71,18 +71,30 @@ const chatSlice = createSlice({
       );
     },
     setUserStatus: (state, action) => {
-      state.openedChat.user.status = action.payload;
+      if (state.openedChat.user) state.openedChat.user.status = action.payload;
     },
-    updateMessageStatus: (state, action) => {
-      if (action.payload) {
-        const message = state.openedChat.messages.find(
-          (msg) => msg._id === action.payload._id
+    updateMessageStatusToSeen: (state, action) => {
+      const message = action.payload;
+      if (message) {
+        const msg = state.openedChat.messages.find(
+          (msg) => msg._id === message._id
         );
-        if (message) {
-          message.status = action.payload.status;
+        if (msg) {
+          msg.status = "SEEN";
         }
       }
-    }
+    },
+    updateMessageStatusToDelivered: (state, action) => {
+      const message = action.payload;
+      if (message) {
+        const msg = state.openedChat.messages.find(
+          (msg) => msg._id === message._id
+        );
+        if (msg) {
+          msg.status = "DELIVERED";
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -131,6 +143,7 @@ export const {
   AddMessage,
   removeMessage,
   setUserStatus,
-  updateMessageStatus,
+  updateMessageStatusToSeen,
+  updateMessageStatusToDelivered,
 } = chatSlice.actions;
 export default chatSlice.reducer;

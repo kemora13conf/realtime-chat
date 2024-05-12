@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react'
+import Cookies from 'js-cookie'
 
 function UnreadMesssages({ conversationId }) {
     const [count, setCount] = useState(1);
     useEffect(() => {
-        // Fetch the unread messages count for the conversation
-        // Update the count using setCount
+        fetch(`${import.meta.env.VITE_API}/conversations/${conversationId}/unread`, {
+            method: 'GET',
+          headers: {
+            Authorization: `Bearer ${Cookies.get('jwt')}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            setCount(data.data);
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+          });
 
     }, [conversationId])
   return (

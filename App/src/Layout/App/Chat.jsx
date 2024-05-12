@@ -14,9 +14,12 @@ import {
   closeChat,
   fetchMessages,
   openChat,
+  updateMessageStatusToDelivered,
+  updateMessageStatusToSeen,
 } from "../../Store/Chat/index.js";
 import EmptyChat from "./EmptyChat.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
+import { updateLastMessageStatus } from "../../Store/Users/index.js";
 
 export default function Chat() {
   const chat = useSelector((state) => state.chat);
@@ -26,6 +29,63 @@ export default function Chat() {
   const dispatch = useDispatch();
   const param = useParams();
   const chatRef = useRef(null);
+
+  const onNewMessage = (message) => {
+    /**
+     * Check if the message is for the current chat
+     * if so add it to the opened chat messages
+     */
+
+    if (message.conversation === user.conversation._id) {
+      if (message.sender._id === user._id) {
+        if (message.receiver._id === currentUser._id) {
+          dispatch(AddMessage(message));
+          dispatch(updateLastMessageStatus({...message, status: "SEEN" } ));
+
+          /**
+           * Emit Seen event to the server to update the message status
+           */
+          if (message.status !== "SEEN") {
+            SocketContext.socket.emit("message-seen", message);
+          }
+        }
+      }
+    }
+  };
+
+  const onMessageSeen = (message) => {
+    /**
+     * Check if the message is for the current chat
+     * if so update the message status
+     */
+    if (message.conversation === user.conversation._id) {
+      if (message.sender._id === currentUser._id) {
+        if (message.receiver._id === user._id) {
+          dispatch(updateMessageStatusToSeen(message));
+        }
+      }
+    }
+  };
+
+  const onMessageDelivered = (message) => {
+    /**
+     * Check if the message is for the current chat
+     * if so update the message status
+     */
+    if (message.conversation === user.conversation._id) {
+      if (message.sender._id === currentUser._id) {
+        if (message.receiver._id === user._id) {
+          dispatch(updateMessageStatusToDelivered(message));
+        }
+      }
+    }
+  };
+
+  const onConnect = () => {
+    SocketContext.socket.on("new-message", onNewMessage);
+    SocketContext.socket.on("message-seen", onMessageSeen);
+    SocketContext.socket.on("message-delivered", onMessageDelivered);
+  };
 
   useEffect(() => {
     dispatch(openChat(param.id));
@@ -42,6 +102,21 @@ export default function Chat() {
     }
   }, [messages]);
 
+  useEffect(() => {
+    if (user) {
+      if (SocketContext.socket && SocketContext.socket.connected) {
+        onConnect();
+      } else {
+        SocketContext.getSocket().on("connect", onConnect);
+      }
+    }
+    return () => {
+      if (SocketContext.socket && SocketContext.socket.connected) {
+        SocketContext.socket.off("new-message", onNewMessage);
+        SocketContext.socket.off("message-seen", onMessageSeen);
+      }
+    };
+  }, [user]);
   useEffect(() => {
     return () => {
       dispatch(closeChat());

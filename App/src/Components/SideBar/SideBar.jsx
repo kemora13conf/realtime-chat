@@ -5,16 +5,11 @@ import UsersList from "./UsersList.jsx";
 import { AnimatePresence } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  MoveToTop,
   USERS_FILTER,
   fetchConversations,
   fetchUsers,
-  updateLastMessage,
-  updateLastMessageStatus,
 } from "../../Store/Users/index.js";
 import ConversationsList from "./ConversationsList.jsx";
-import SocketContext from "../../Context/LoadSocket.js";
-import { AddMessage, updateMessageStatus } from "../../Store/Chat/index.js";
 
 export default function SideBar({ bounds }) {
   const users = useSelector((state) => state.users);

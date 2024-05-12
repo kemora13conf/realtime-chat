@@ -7,6 +7,7 @@ import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
 import ImageModal from "./imageModal.jsx";
 import FilesModal from "./filesModal.jsx";
 import { AnimatePresence } from "framer-motion";
+import { MoveToTop, updateLastMessage } from "../../Store/Users/index.js";
 
 export default function MessageForm() {
   const currentUser = useSelector((state) => state.auth.user);
@@ -53,6 +54,8 @@ export default function MessageForm() {
       const res = await response.json();
       if (res.type == 'success') {
         dispatch(AddMessage(res.data));
+        dispatch(updateLastMessage(res.data));
+        dispatch(MoveToTop(res.data.conversation));
       }
     } else {
       toast.error("Failed to send message");
