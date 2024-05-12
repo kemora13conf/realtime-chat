@@ -1,7 +1,11 @@
 import Database from "../Database.js";
-import { answerObject } from "../Helpers/utils.js";
+import {
+  ConvertFileToBase64,
+  DeSerializeTextMessage,
+  answerObject,
+} from "../Helpers/utils.js";
 import Conversations from "../Models/Conversations.js";
-import Messages, { MESSAGE_STATUS } from "../Models/Messages.js";
+import Messages, { MESSAGE_STATUS, MESSAGE_TYPES } from "../Models/Messages.js";
 import Users from "../Models/Users.js";
 import { ObjectId } from "mongodb";
 import { io } from "../server.js";
@@ -9,7 +13,8 @@ import fs from "fs";
 import path from "path";
 import { __dirname } from "../App.js";
 import multer from "multer";
-
+import Logger from "../Helpers/Logger.js";
+import MessageContent from "../Models/MessageContent.js";
 
 /**
  *
@@ -82,7 +87,7 @@ export const conversations = async (req, res) => {
     await Database.getInstance();
     const { current_user } = req;
     const userId = new ObjectId(current_user._id);
-    const conversations = await Conversations.find({
+    let conversations = await Conversations.find({
       $or: [{ startedBy: userId }, { to: userId }],
     })
       .sort({ updatedAt: -1 })
@@ -101,9 +106,9 @@ export const conversations = async (req, res) => {
     });
 
     /**
-     * loading these conversation mean the current user 
+     * loading these conversation mean the current user
      * is received the messages in those conversations
-     * but he didn't see them yet. So we gonna change the 
+     * but he didn't see them yet. So we gonna change the
      * status of the messages to SEEN
      */
     for (let conversation of conversations) {
@@ -120,6 +125,28 @@ export const conversations = async (req, res) => {
         io.to(String(message.sender._id)).emit("message-delivered", message);
       }
     }
+
+    conversations = conversations.map((conversation) => {
+      return {
+        ...conversation._doc,
+        last_message: conversation.last_message
+          ? {
+              ...conversation.last_message._doc,
+              content: conversation.last_message.content.map((file) => {
+                return {
+                  _id: file._id,
+                  message:
+                    file.contentType === "text/plain"
+                      ? DeSerializeTextMessage(file.message)
+                      : ConvertFileToBase64(file.message),
+                  fileName: file.fileName,
+                  fileSize: file.fileSize,
+                };
+              }),
+            }
+          : null,
+      };
+    });
 
     return res.status(200).json(
       answerObject("success", "Conversations fetched successfully", {
@@ -174,24 +201,85 @@ export const messages = async (req, res) => {
     let messages = await Messages.find({ conversation: conversation._id })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .populate("sender", "username profile-picture")
-      .populate("receiver", "username profile-picture");
+      .limit(limit);
     messages = messages.reverse();
 
     /**
      * Here we need to make all the received messages as seen
      */
-    await Messages.updateMany(
-      { conversation: conversation._id, receiver: req.current_user._id },
-      { status: "SEEN" }
+    let unseenMessages = messages.filter(
+      (message) =>
+        message.receiver._id == req.current_user._id.toString() &&
+        message.status != MESSAGE_STATUS.SEEN
     );
-    io.to(req.receiver._id.toString()).emit("messages-seen", conversation._id);
+    for (let message of unseenMessages) {
+      message.status = MESSAGE_STATUS.SEEN;
+      await message.save();
+      await message.populate("sender", "username profile-picture");
+      await message.populate("receiver", "username profile-picture");
+      await message.populate("content");
+      io.to(message.sender._id.toString()).emit("message-seen", message);
+      io.to(message.receiver._id.toString()).emit("message-seen", message);
+    }
+
+    // decode Messages content
+    messages = messages.map((message) => {
+      if (
+        message.type === MESSAGE_TYPES.FILE ||
+        message.type === MESSAGE_TYPES.IMAGE ||
+        message.type === MESSAGE_TYPES.TEXT
+      ) {
+        return {
+          ...message._doc,
+          content: message.content.map((file) => {
+            return {
+              _id: file._id,
+              message:
+                file.contentType === "text/plain"
+                  ? DeSerializeTextMessage(file.message)
+                  : ConvertFileToBase64(file.message),
+              fileName: file.fileName,
+              fileSize: file.fileSize,
+            };
+          }),
+        };
+      }
+      return message;
+    });
     return res
       .status(200)
       .json(answerObject("success", "Messages fetched successfully", messages));
   } catch (err) {
     console.log(err);
+    return res.status(500).json(answerObject("error", "Internal server error"));
+  }
+};
+
+/**
+ * Get all the unread messages
+ * @param {Request} req
+ * @param {Response} res
+ * @returns HttpResponse with Messages[] | InternalServerError
+ */
+export const unread_messages = async (req, res) => {
+  try {
+    await Database.getInstance();
+    const { current_user } = req;
+    const userId = new ObjectId(current_user._id);
+    const messages = await Messages.countDocuments({
+      receiver: userId,
+      status: { $ne: MESSAGE_STATUS.SEEN },
+    });
+    return res
+      .status(200)
+      .json(
+        answerObject(
+          "success",
+          "Unread messages fetched successfully",
+          messages
+        )
+      );
+  } catch (err) {
     return res.status(500).json(answerObject("error", "Internal server error"));
   }
 };
@@ -234,46 +322,66 @@ export const new_message = async (req, res) => {
      * Now we can save the message and update the last_message field
      */
     const { text } = req.body;
+    const messageContent = await MessageContent.create({
+      message: Buffer.from(text, "utf-8"),
+      contentType: "text/plain",
+    });
     const message = new Messages({
       sender: current_user._id,
       receiver: receiver._id,
       conversation: conversation._id,
-      text,
+      content: messageContent._id,
     });
     await message.save();
-    await message.populate("sender", "username profile-picture");
-    await message.populate("receiver", "username profile-picture");
+    await message.populate("content");
     conversation.last_message = message._id;
     await conversation.save();
 
-    io.to(receiver._id.toString()).emit("new-message", message);
-    // io.to(current_user._id.toString()).emit("new-message", message);
-    return res
-      .status(200)
-      .json(answerObject("success", "Message sent successfully", message));
+    io.to(receiver._id.toString()).emit("new-message", {
+      ...message._doc,
+      content: message.content.map((file) => {
+        return {
+          _id: file._id,
+          message:
+            file.contentType === "text/plain"
+              ? DeSerializeTextMessage(file.message)
+              : ConvertFileToBase64(file.message),
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+        };
+      }),
+    });
+    return res.status(200).json(
+      answerObject("success", "Message sent successfully", {
+        ...message._doc,
+        content: message.content.map((file) => {
+          return {
+            _id: file._id,
+            message:
+              file.contentType === "text/plain"
+                ? DeSerializeTextMessage(file.message)
+                : ConvertFileToBase64(file.message),
+            fileName: file.fileName,
+            fileSize: file.fileSize,
+          };
+        }),
+      })
+    );
   } catch (err) {
+    console.log(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
   }
 };
 
-function generateFileName(originalname) {
-  let arrName = originalname.split(".");
-  let salt = Math.random().toString(36).substring(7);
-  let extension = arrName[arrName.length - 1];
-  let nameWithoutExtension = arrName.slice(0, arrName.length - 1).join(".");
-  let saveAs = `${nameWithoutExtension}-${salt}.${extension}`;
-  return saveAs;
-}
-
-function saveFile(file, name, location) {
-  let saveAs = generateFileName(name);
-  let filePath = path.join(__dirname, location, saveAs);
-  fs.writeFileSync(filePath, file);
-  return saveAs;
-}
-
 const storage = multer.memoryStorage();
 export const upload = multer({ storage: storage });
+function getFilename(originalname) {
+  let arrName = originalname.split(".");
+  let extension = arrName[arrName.length - 1];
+  let timestamps = new Date();
+  let saveAs = `RealTimeChat-${timestamps}.${extension}`;
+  return saveAs;
+}
 
 /**
  * Send a new message of type image
@@ -310,29 +418,71 @@ export const new_message_image = async (req, res) => {
 
     const { file } = req;
     const sender = req.current_user;
-    const imageName = saveFile(
-      file.buffer,
-      file.originalname,
-      "./Assets/Messages-files"
-    );
+    const messageContent = await MessageContent.create({
+      message: file.buffer,
+      contentType: file.mimetype,
+      fileName: getFilename(file.originalname),
+      fileSize: file.size,
+    });
+
     const message = new Messages({
       sender: sender._id,
       receiver: receiver._id,
       conversation: conversation._id,
       type: "IMAGE",
-      image: imageName,
+      content: [messageContent._id],
     });
     await message.save();
     await message.populate("sender", "username profile-picture");
     await message.populate("receiver", "username profile-picture");
+    await message.populate("content");
     conversation.last_message = message._id;
     await conversation.save();
 
-    io.to(receiver._id.toString()).emit("new-message", message);
-    io.to(sender._id.toString()).emit("new-message", message);
-    return res
-      .status(200)
-      .json(answerObject("success", "Message sent successfully", message));
+    io.to(receiver._id.toString()).emit("new-message", {
+      ...message._doc,
+      content: message.content.map((file) => {
+        return {
+          _id: file._id,
+          message:
+            file.contentType === "text/plain"
+              ? DeSerializeTextMessage(file.message)
+              : ConvertFileToBase64(file.message),
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+        };
+      }),
+    });
+    io.to(sender._id.toString()).emit("new-message", {
+      ...message._doc,
+      content: message.content.map((file) => {
+        return {
+          _id: file._id,
+          message:
+            file.contentType === "text/plain"
+              ? DeSerializeTextMessage(file.message)
+              : ConvertFileToBase64(file.message),
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+        };
+      }),
+    });
+    return res.status(200).json(
+      answerObject("success", "Message sent successfully", {
+        ...message._doc,
+        content: message.content.map((file) => {
+          return {
+            _id: file._id,
+            message:
+              file.contentType === "text/plain"
+                ? DeSerializeTextMessage(file.message)
+                : ConvertFileToBase64(file.message),
+            fileName: file.fileName,
+            fileSize: file.fileSize,
+          };
+        }),
+      })
+    );
   } catch (err) {
     console.log(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
@@ -374,33 +524,74 @@ export const new_message_files = async (req, res) => {
 
     const { files } = req;
     const sender = req.current_user;
-    let fileNames = [];
+    let filesIds = [];
     for (let file of files) {
-      let fileName = saveFile(
-        file.buffer,
-        file.originalname,
-        "./Assets/Messages-files"
-      );
-      fileNames.push(fileName);
+      const fileContent = await MessageContent.create({
+        message: file.buffer,
+        contentType: file.mimetype,
+        fileName: getFilename(file.originalname),
+        fileSize: file.size,
+      });
+      filesIds.push(fileContent._id);
     }
     const message = new Messages({
       sender: sender._id,
       receiver: receiver._id,
       conversation: conversation._id,
       type: "FILE",
-      files: fileNames,
+      content: filesIds,
     });
     await message.save();
     await message.populate("sender", "username profile-picture");
     await message.populate("receiver", "username profile-picture");
+    await message.populate("content");
     conversation.last_message = message._id;
     await conversation.save();
 
-    io.to(receiver._id.toString()).emit("new-message", message);
-    io.to(sender._id.toString()).emit("new-message", message);
-    return res
-      .status(200)
-      .json(answerObject("success", "Message sent successfully", message));
+    io.to(receiver._id.toString()).emit("new-message", {
+      ...message._doc,
+      content: message.content.map((file) => {
+        return {
+          _id: file._id,
+          message:
+            file.contentType === "text/plain"
+              ? DeSerializeTextMessage(file.message)
+              : ConvertFileToBase64(file.message),
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+        };
+      }),
+    });
+    io.to(sender._id.toString()).emit("new-message", {
+      ...message._doc,
+      content: message.content.map((file) => {
+        return {
+          _id: file._id,
+          message:
+            file.contentType === "text/plain"
+              ? DeSerializeTextMessage(file.message)
+              : ConvertFileToBase64(file.message),
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+        };
+      }),
+    });
+    return res.status(200).json(
+      answerObject("success", "Message sent successfully", {
+        ...message._doc,
+        content: message.content.map((file) => {
+          return {
+            _id: file._id,
+            message:
+              file.contentType === "text/plain"
+                ? DeSerializeTextMessage(file.message)
+                : ConvertFileToBase64(file.message),
+            fileName: file.fileName,
+            fileSize: file.fileSize,
+          };
+        }),
+      })
+    );
   } catch (err) {
     return res.status(500).json(answerObject("error", "Internal server error"));
   }

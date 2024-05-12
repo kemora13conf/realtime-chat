@@ -76,29 +76,39 @@ io.use(async (socket, next) => {
 io.on("connection", (socket) => {
   socket.on("message-delivered", async (message) => {
     try {
-      const msg = await Messages.findOne({ _id: message._id });
-      msg.status = MESSAGE_STATUS.DELIVERED;
-      await msg.save();
+      const msg = await Messages.findOne({
+        _id: message._id,
+        receiver: socket.user._id,
+        status: MESSAGE_STATUS.SENT,
+      });
+      if (msg) {
+        msg.status = MESSAGE_STATUS.DELIVERED;
+        await msg.save();
 
-      await msg.populate("sender", "username profile-picture");
-      await msg.populate("receiver", "username profile-picture");
+        await msg.populate("sender", "username profile-picture");
+        await msg.populate("receiver", "username profile-picture");
 
-      io.to(String(msg.sender._id)).emit("message-delivered", msg);
+        io.to(String(msg.sender._id)).emit("message-delivered", msg);
+      }
     } catch (error) {
       console.log(error.message);
     }
   });
   socket.on("message-seen", async (message) => {
     try {
-      const msg = await Messages.findOne({ _id: message._id });
-      msg.status = MESSAGE_STATUS.SEEN;
-      await msg.save();
+      const msg = await Messages.findOne({
+        _id: message._id,
+        receiver: socket.user._id.toString(),
+        status: { $ne: MESSAGE_STATUS.SEEN },
+      });
+      if (msg) {
+        msg.status = MESSAGE_STATUS.SEEN;
+        await msg.save();
+        await msg.populate("sender", "username profile-picture");
+        await msg.populate("receiver", "username profile-picture");
 
-      await msg.populate("sender", "username profile-picture");
-      await msg.populate("receiver", "username profile-picture");
-
-      io.to(String(msg.sender._id)).emit("message-seen", msg);
-      io.to(String(msg.receiver._id)).emit("message-seen", msg);
+        io.to(msg.sender._id.toString()).emit("message-seen", msg);
+      }
     } catch (error) {
       console.log(error.message);
     }
