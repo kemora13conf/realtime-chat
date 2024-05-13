@@ -1,7 +1,7 @@
 import Database from "../Database.js";
 import {
-  ConvertFileToBase64,
-  DeSerializeTextMessage,
+  GetConversationByParticipantsOrCreateOne,
+  SerializeMessageContent,
   answerObject,
 } from "../Helpers/utils.js";
 import Conversations from "../Models/Conversations.js";
@@ -9,12 +9,10 @@ import Messages, { MESSAGE_STATUS, MESSAGE_TYPES } from "../Models/Messages.js";
 import Users from "../Models/Users.js";
 import { ObjectId } from "mongodb";
 import { io } from "../server.js";
-import fs from "fs";
-import path from "path";
 import { __dirname } from "../App.js";
 import multer from "multer";
-import Logger from "../Helpers/Logger.js";
 import MessageContent from "../Models/MessageContent.js";
+import Logger from "../Helpers/Logger.js";
 
 /**
  *
@@ -76,6 +74,42 @@ export const findReceiverById = async (req, res, next, id) => {
 };
 
 /**
+ * 
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {NextFunction} next 
+ * @param {ObjectId} id 
+ * @returns NotFoundError | InternalServerError
+ */
+export const fileById = async (req, res, next, id) => {
+  try {
+    await Database.getInstance();
+    let file = await MessageContent.findById(id);
+    if (!file) {
+      return res.status(404).json(answerObject("error", "file not found"));
+    }
+    req.file = file;
+    next();
+  } catch (err) {
+    Logger.error(err);
+    return res.status(500).json(answerObject("error", "Internal server error"));
+  }
+};
+
+export const get_file = async (req, res) => {
+  try {
+    const { file } = req;
+    res.setHeader("Content-Type", file.contentType);
+    res.setHeader("Content-Disposition", `attachment; filename=${file.fileName}`);
+    res.send(file.message);
+  } catch (err) {
+    Logger.error(err);
+    return res.status(500).json(answerObject("error", "Internal server error"));
+  }
+};
+
+
+/**
  *
  * @param {Request} req
  * @param {Response} res
@@ -92,15 +126,7 @@ export const conversations = async (req, res) => {
     })
       .sort({ updatedAt: -1 })
       .skip((page - 1) * limit)
-      .limit(limit)
-      .populate("to startedBy", "username last_seen profile-picture")
-      .populate({
-        path: "last_message",
-        populate: {
-          path: "sender receiver",
-          select: "username profile-picture",
-        },
-      });
+      .limit(limit);
     const totalDocs = await Conversations.countDocuments({
       $or: [{ startedBy: userId }, { to: userId }],
     });
@@ -120,31 +146,21 @@ export const conversations = async (req, res) => {
       for (let message of messages) {
         message.status = MESSAGE_STATUS.DELIVERED;
         await message.save();
-        await message.populate("sender", "username profile-picture");
-        await message.populate("receiver", "username profile-picture");
         io.to(String(message.sender._id)).emit("message-delivered", message);
       }
     }
 
     conversations = conversations.map((conversation) => {
+      /**
+       * Here we need to decode the message content
+       * because the message content is stored as a buffer
+       */
       return {
         ...conversation._doc,
-        last_message: conversation.last_message
-          ? {
-              ...conversation.last_message._doc,
-              content: conversation.last_message.content.map((file) => {
-                return {
-                  _id: file._id,
-                  message:
-                    file.contentType === "text/plain"
-                      ? DeSerializeTextMessage(file.message)
-                      : ConvertFileToBase64(file.message),
-                  fileName: file.fileName,
-                  fileSize: file.fileSize,
-                };
-              }),
-            }
-          : null,
+        last_message:
+          conversation.last_message != null
+            ? SerializeMessageContent(conversation.last_message)
+            : null,
       };
     });
 
@@ -175,26 +191,11 @@ export const messages = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   try {
     await Database.getInstance();
-    let conversation = await Conversations.findOne({
-      $or: [
-        { startedBy: req.current_user._id, to: req.receiver._id },
-        { startedBy: req.receiver._id, to: req.current_user._id },
-      ],
-    })
-      .populate("to startedBy", "username last_seen profile-picture")
-      .populate("last_message");
-    if (!conversation) {
-      // create a new conversation
-      conversation = new Conversations({
-        startedBy: req.current_user._id,
-        to: req.receiver._id,
-      });
-      await conversation.save();
-      await conversation.populate(
-        "to startedBy",
-        "username last_seen profile-picture"
-      );
-    }
+    let conversation = await GetConversationByParticipantsOrCreateOne({
+      current_user: req.current_user,
+      user: req.receiver,
+    });
+
     /**
      * Here we need to do reversed pagination
      */
@@ -202,6 +203,9 @@ export const messages = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
+    let totalDocs = await Messages.countDocuments({
+      conversation: conversation._id,
+    });
     messages = messages.reverse();
 
     /**
@@ -215,9 +219,6 @@ export const messages = async (req, res) => {
     for (let message of unseenMessages) {
       message.status = MESSAGE_STATUS.SEEN;
       await message.save();
-      await message.populate("sender", "username profile-picture");
-      await message.populate("receiver", "username profile-picture");
-      await message.populate("content");
       io.to(message.sender._id.toString()).emit("message-seen", message);
       io.to(message.receiver._id.toString()).emit("message-seen", message);
     }
@@ -229,26 +230,25 @@ export const messages = async (req, res) => {
         message.type === MESSAGE_TYPES.IMAGE ||
         message.type === MESSAGE_TYPES.TEXT
       ) {
-        return {
-          ...message._doc,
-          content: message.content.map((file) => {
-            return {
-              _id: file._id,
-              message:
-                file.contentType === "text/plain"
-                  ? DeSerializeTextMessage(file.message)
-                  : ConvertFileToBase64(file.message),
-              fileName: file.fileName,
-              fileSize: file.fileSize,
-            };
-          }),
-        };
+        /**
+         * Here we need to decode the message content
+         * because the message content is stored as a buffer
+         */
+        return SerializeMessageContent(message);
       }
       return message;
     });
-    return res
-      .status(200)
-      .json(answerObject("success", "Messages fetched successfully", messages));
+    return res.status(200).json(
+      answerObject("success", "Messages fetched successfully", {
+        messages,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(totalDocs / limit),
+          total: totalDocs,
+        },
+      })
+    );
   } catch (err) {
     console.log(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
@@ -292,40 +292,29 @@ export const unread_messages = async (req, res) => {
  */
 export const new_message = async (req, res) => {
   try {
-    await Database.getInstance();
-
+    await Database.getInstance(); // Ensure the database is connected
     /**
      * We need first to get the conversation between the two users
      * or create a new one if it doesn't exist
      */
     const { current_user, receiver } = req;
-    let conversation = await Conversations.findOne({
-      $or: [
-        { startedBy: current_user._id, to: receiver._id },
-        { startedBy: receiver._id, to: current_user._id },
-      ],
+    let conversation = await GetConversationByParticipantsOrCreateOne({
+      current_user,
+      user: receiver,
     });
-    if (!conversation) {
-      // create a new conversation
-      conversation = new Conversations({
-        startedBy: req.current_user._id,
-        to: req.receiver._id,
-      });
-      await conversation.save();
-      await conversation.populate(
-        "to startedBy",
-        "username last_seen profile-picture"
-      );
-    }
 
     /**
      * Now we can save the message and update the last_message field
      */
-    const { text } = req.body;
+    const { text } = req.body; // get the message text from the request body
+
+    // create a new message content
     const messageContent = await MessageContent.create({
       message: Buffer.from(text, "utf-8"),
       contentType: "text/plain",
     });
+
+    // create a new message
     const message = new Messages({
       sender: current_user._id,
       receiver: receiver._id,
@@ -333,54 +322,50 @@ export const new_message = async (req, res) => {
       content: messageContent._id,
     });
     await message.save();
-    await message.populate("content");
+
+    // Update the last_message field in the conversation
     conversation.last_message = message._id;
     await conversation.save();
 
-    io.to(receiver._id.toString()).emit("new-message", {
-      ...message._doc,
-      content: message.content.map((file) => {
-        return {
-          _id: file._id,
-          message:
-            file.contentType === "text/plain"
-              ? DeSerializeTextMessage(file.message)
-              : ConvertFileToBase64(file.message),
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-        };
-      }),
-    });
-    return res.status(200).json(
-      answerObject("success", "Message sent successfully", {
-        ...message._doc,
-        content: message.content.map((file) => {
-          return {
-            _id: file._id,
-            message:
-              file.contentType === "text/plain"
-                ? DeSerializeTextMessage(file.message)
-                : ConvertFileToBase64(file.message),
-            fileName: file.fileName,
-            fileSize: file.fileSize,
-          };
-        }),
-      })
+    // Emit the new message to the receiver
+    io.to(receiver._id.toString()).emit(
+      "new-message",
+      SerializeMessageContent(message)
     );
+
+    return res
+      .status(200)
+      .json(
+        answerObject(
+          "success",
+          "Message sent successfully",
+          SerializeMessageContent(message)
+        )
+      );
   } catch (err) {
     console.log(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
   }
 };
 
-const storage = multer.memoryStorage();
-export const upload = multer({ storage: storage });
+/**
+ * Initialize the multer storage engine
+ * to store the files in memory
+ */
+const storage = multer.memoryStorage(); // store the files in memory
+export const upload = multer({ storage: storage }); // initialize the multer
+
+/**
+ * @function getFilename
+ * @param {String} originalname
+ * @returns {String} Generated filename `RealTimeChat-timestamps.extension`
+ */
 function getFilename(originalname) {
   let arrName = originalname.split(".");
   let extension = arrName[arrName.length - 1];
   let timestamps = new Date();
-  let saveAs = `RealTimeChat-${timestamps}.${extension}`;
-  return saveAs;
+  let generatedName = `RealTimeChat-${timestamps}.${extension}`;
+  return generatedName;
 }
 
 /**
@@ -391,33 +376,25 @@ function getFilename(originalname) {
  */
 export const new_message_image = async (req, res) => {
   try {
-    await Database.getInstance();
+    await Database.getInstance(); // Ensure the database is connected
     /**
      * We need first to get the conversation between the two users
      * or create a new one if it doesn't exist
      */
     const { current_user, receiver } = req;
-    let conversation = await Conversations.findOne({
-      $or: [
-        { startedBy: current_user._id, to: receiver._id },
-        { startedBy: receiver._id, to: current_user._id },
-      ],
-    });
-    if (!conversation) {
-      // create a new conversation
-      conversation = new Conversations({
-        startedBy: req.current_user._id,
-        to: req.receiver._id,
-      });
-      await conversation.save();
-      await conversation.populate(
-        "to startedBy",
-        "username last_seen profile-picture"
-      );
-    }
 
-    const { file } = req;
-    const sender = req.current_user;
+    /**
+     * We need first to get the conversation between the two users
+     * or create a new one if it doesn't exist
+     */
+    let conversation = await GetConversationByParticipantsOrCreateOne({
+      current_user,
+      user: receiver,
+    });
+
+    const { file } = req; // get the image file from the request
+
+    // create a new message content
     const messageContent = await MessageContent.create({
       message: file.buffer,
       contentType: file.mimetype,
@@ -425,64 +402,39 @@ export const new_message_image = async (req, res) => {
       fileSize: file.size,
     });
 
+    // create a new message
     const message = new Messages({
-      sender: sender._id,
+      sender: req.current_user._id,
       receiver: receiver._id,
       conversation: conversation._id,
       type: "IMAGE",
       content: [messageContent._id],
     });
     await message.save();
-    await message.populate("sender", "username profile-picture");
-    await message.populate("receiver", "username profile-picture");
-    await message.populate("content");
+
+    // Update the last_message field in the conversation
     conversation.last_message = message._id;
     await conversation.save();
 
-    io.to(receiver._id.toString()).emit("new-message", {
-      ...message._doc,
-      content: message.content.map((file) => {
-        return {
-          _id: file._id,
-          message:
-            file.contentType === "text/plain"
-              ? DeSerializeTextMessage(file.message)
-              : ConvertFileToBase64(file.message),
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-        };
-      }),
-    });
-    io.to(sender._id.toString()).emit("new-message", {
-      ...message._doc,
-      content: message.content.map((file) => {
-        return {
-          _id: file._id,
-          message:
-            file.contentType === "text/plain"
-              ? DeSerializeTextMessage(file.message)
-              : ConvertFileToBase64(file.message),
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-        };
-      }),
-    });
-    return res.status(200).json(
-      answerObject("success", "Message sent successfully", {
-        ...message._doc,
-        content: message.content.map((file) => {
-          return {
-            _id: file._id,
-            message:
-              file.contentType === "text/plain"
-                ? DeSerializeTextMessage(file.message)
-                : ConvertFileToBase64(file.message),
-            fileName: file.fileName,
-            fileSize: file.fileSize,
-          };
-        }),
-      })
+    // Emit the new message to the receiver
+    io.to(receiver._id.toString()).emit(
+      "new-message",
+      SerializeMessageContent(message)
     );
+    // Emit the new message to the sender
+    io.to(req.current_user._id.toString()).emit(
+      "new-message",
+      SerializeMessageContent(message)
+    );
+    return res
+      .status(200)
+      .json(
+        answerObject(
+          "success",
+          "Message sent successfully",
+          SerializeMessageContent(message)
+        )
+      );
   } catch (err) {
     console.log(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
@@ -503,28 +455,18 @@ export const new_message_files = async (req, res) => {
      * or create a new one if it doesn't exist
      */
     const { current_user, receiver } = req;
-    let conversation = await Conversations.findOne({
-      $or: [
-        { startedBy: current_user._id, to: receiver._id },
-        { startedBy: receiver._id, to: current_user._id },
-      ],
+    let conversation = await GetConversationByParticipantsOrCreateOne({
+      current_user,
+      user: receiver,
     });
-    if (!conversation) {
-      // create a new conversation
-      conversation = new Conversations({
-        startedBy: req.current_user._id,
-        to: req.receiver._id,
-      });
-      await conversation.save();
-      await conversation.populate(
-        "to startedBy",
-        "username last_seen profile-picture"
-      );
-    }
 
-    const { files } = req;
-    const sender = req.current_user;
-    let filesIds = [];
+    const { files } = req; // get the files from the request
+
+    /**
+     * Create a new message content for each file
+     * and save the file in the database
+     */
+    let filesIds = []; // store the ids of each MessageContent
     for (let file of files) {
       const fileContent = await MessageContent.create({
         message: file.buffer,
@@ -534,6 +476,8 @@ export const new_message_files = async (req, res) => {
       });
       filesIds.push(fileContent._id);
     }
+
+    // create a new message
     const message = new Messages({
       sender: sender._id,
       receiver: receiver._id,
@@ -542,56 +486,30 @@ export const new_message_files = async (req, res) => {
       content: filesIds,
     });
     await message.save();
-    await message.populate("sender", "username profile-picture");
-    await message.populate("receiver", "username profile-picture");
-    await message.populate("content");
+
+    // Update the last_message field in the conversation
     conversation.last_message = message._id;
     await conversation.save();
 
-    io.to(receiver._id.toString()).emit("new-message", {
-      ...message._doc,
-      content: message.content.map((file) => {
-        return {
-          _id: file._id,
-          message:
-            file.contentType === "text/plain"
-              ? DeSerializeTextMessage(file.message)
-              : ConvertFileToBase64(file.message),
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-        };
-      }),
-    });
-    io.to(sender._id.toString()).emit("new-message", {
-      ...message._doc,
-      content: message.content.map((file) => {
-        return {
-          _id: file._id,
-          message:
-            file.contentType === "text/plain"
-              ? DeSerializeTextMessage(file.message)
-              : ConvertFileToBase64(file.message),
-          fileName: file.fileName,
-          fileSize: file.fileSize,
-        };
-      }),
-    });
-    return res.status(200).json(
-      answerObject("success", "Message sent successfully", {
-        ...message._doc,
-        content: message.content.map((file) => {
-          return {
-            _id: file._id,
-            message:
-              file.contentType === "text/plain"
-                ? DeSerializeTextMessage(file.message)
-                : ConvertFileToBase64(file.message),
-            fileName: file.fileName,
-            fileSize: file.fileSize,
-          };
-        }),
-      })
+    // Emit the new message to the receiver
+    io.to(receiver._id.toString()).emit(
+      "new-message",
+      SerializeMessageContent(message)
     );
+    // Emit the new message to the sender
+    io.to(sender._id.toString()).emit(
+      "new-message",
+      SerializeMessageContent(message)
+    );
+    return res
+      .status(200)
+      .json(
+        answerObject(
+          "success",
+          "Message sent successfully",
+          SerializeMessageContent(message)
+        )
+      );
   } catch (err) {
     return res.status(500).json(answerObject("error", "Internal server error"));
   }

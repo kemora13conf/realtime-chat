@@ -1,7 +1,6 @@
 import Database from "../Database.js";
 import Logger from "../Helpers/Logger.js";
-import { answerObject } from "../Helpers/utils.js";
-import Conversations from "../Models/Conversations.js";
+import { GetConversationByParticipantsOrCreateOne, answerObject } from "../Helpers/utils.js";
 import Users from "../Models/Users.js";
 import { io } from "../server.js";
 
@@ -47,35 +46,25 @@ export async function findUserById(req, res, next, id) {
       res.status(404).json(answerObject("error", "User not found"));
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json(answerObject("error", error.message));
   }
 }
+
+/**
+ * Controller to get the user
+ * @param {Request} req 
+ * @param {Response} res
+ * @returns {Response} response with answerObject
+ */
 export async function user(req, res) {
   try {
     /**
      * Get the conversation between the current user and the user
+     * If the conversation does not exist, create a new conversation
      */
-    let conversation = await Conversations.findOne({
-      $or: [
-        { startedBy: req.current_user._id, to: req.user._id },
-        { startedBy: req.user._id, to: req.current_user._id },
-      ],
-    })
-
-    if (!conversation) {
-      conversation = await Conversations.create({
-        startedBy: req.current_user._id,
-        to: req.user._id,
-      });
-    }
-
-    await conversation.populate({
-      path: "last_message",
-      populate: {
-        path: "sender receiver",
-        select: "username profile-picture last_seen",
-      },
+    let conversation = await GetConversationByParticipantsOrCreateOne({
+      current_user: req.current_user,
+      user: req.user,
     });
 
     req.user = {

@@ -104,7 +104,7 @@ const chatSlice = createSlice({
       .addCase(fetchMessages.fulfilled, (state, action) => {
         state.isMessagesFetching = false;
         if (action.payload.type === "success") {
-          state.openedChat.messages = action.payload.data;
+          state.openedChat.messages = action.payload.data.messages;
         } else {
           toast.error(action.payload.message, { theme: "dark" });
         }

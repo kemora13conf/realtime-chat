@@ -15,7 +15,7 @@ App.use((req, res, next) => {
 
 // Setting the corsOptions
 const corsOptions = {
-  origin: '*',
+  origin: CORS_ORIGIN,
   optionsSuccessStatus: 200,
   methods: ["GET", "POST", "PUT", "DELETE"],
 };
@@ -24,7 +24,6 @@ App.use(cors(corsOptions));
 
 // Setting the assets folder
 export const __dirname = dirname(fileURLToPath(import.meta.url));
-App.use(express.static(path.join(__dirname, "./Assets")));
 App.use("/assets", express.static(path.join(__dirname, "/dist/assets")));
 
 App.use(express.json());

@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import Logger from "../Helpers/Logger.js";
-import { ConvertFileToBase64, DeSerializeTextMessage } from "../Helpers/utils.js";
 
 const { model, models, Schema } = mongoose;
 
@@ -57,32 +56,32 @@ const messagesSchema = new mongoose.Schema(
   }
 );
 
-messagesSchema.pre('find', function () {
-  this.populate('content');
-  this.populate('sender', 'username profile-picture');
-  this.populate('receiver', 'username profile-picture');
-  if (this.type === MESSAGE_TYPES.TEXT) {
-    this.content = DeSerializeTextMessage(this.content.message);
-  } else if (this.type === MESSAGE_TYPES.FILE || this.type === MESSAGE_TYPES.IMAGE) {
-    this.content = ConvertFileToBase64(this.content.message);
-  }
-});
-messagesSchema.pre('findOne', function () {
-  this.populate('content');
-  this.populate('sender', 'username profile-picture');
-  this.populate('receiver', 'username profile-picture');
-});
-messagesSchema.pre('save', async function () {
+messagesSchema.pre("find", function () {
   try {
-    await this.populate('content')
-    await this.populate('sender', 'username profile-picture');
-    await this.populate('receiver', 'username profile-picture');
-
+    this.populate("content");
+    this.populate("sender", "username profile-picture");
+    this.populate("receiver", "username profile-picture");
   } catch (error) {
     Logger.error(error.message);
   }
 });
-
-
+messagesSchema.pre("findOne", function () {
+  try {
+    this.populate("content");
+    this.populate("sender", "username profile-picture");
+    this.populate("receiver", "username profile-picture");
+  } catch (error) {
+    Logger.error(error.message);
+  }
+});
+messagesSchema.pre("save", async function () {
+  try {
+    await this.populate("content");
+    await this.populate("sender", "username profile-picture");
+    await this.populate("receiver", "username profile-picture");
+  } catch (error) {
+    Logger.error(error.message);
+  }
+});
 
 export default models.Messages || model("Messages", messagesSchema);

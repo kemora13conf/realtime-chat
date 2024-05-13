@@ -161,11 +161,16 @@ const login = async (req, res) => {
   }
 };
 async function requireSingin(req, res, next) {
-  await Database.getInstance();
   try {
+    await Database.getInstance(); // Ensure database connection
     const Authorization = req.headers.authorization;
-    if (Authorization) {
-      const token = Authorization.split(" ")[1];
+    let token = Authorization
+      ? Authorization.split(" ")[1]
+      : req.query.token
+        ? req.query.token
+        : null;
+    
+    if (token !== null) {
       const verificationResponse = jwt.verify(token, JWT_SECRET);
       const userId = verificationResponse._id;
 
@@ -182,7 +187,8 @@ async function requireSingin(req, res, next) {
           .json(answerObject("error", "Wrong authentication token"));
       }
     } else {
-      res
+
+      return res
         .status(404)
         .json(answerObject("error", "Authentication token missing"));
     }
