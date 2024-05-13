@@ -1,4 +1,5 @@
 import React from "react";
+import { downloadFile } from "../../Helpers/utils.js";
 
 function ImagesMessage({ msg }) {
   return (
@@ -13,10 +14,9 @@ function ImagesMessage({ msg }) {
                 backdrop-blur-md rounded-md shadow-card"
       >
         <a
-          href={`${import.meta.env.VITE_API}/conversations/Messages-files/${
-            msg.content[0]._id
-          }`}
-          download
+          onClick={() => {
+            downloadFile(msg.content[0]._id, msg.content[0].fileName);
+          }}
           className="text-quaternary-600 text-[12px] font-light flex items-center gap-[10px] py-[5px] px-[10px]"
         >
           <i className="fas fa-download"></i>
