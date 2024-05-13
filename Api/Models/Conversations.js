@@ -1,3 +1,4 @@
+import { populate } from "dotenv";
 import mongoose from "mongoose";
 
 const { Schema, models, model } = mongoose;
@@ -43,6 +44,10 @@ const objectToPopulate = [
   {
     path: "startedBy to",
     select: "username profile-picture last_seen",
+    populate: {
+      path: "profile-picture",
+      select: "data contentType fileName",
+    },
   },
 ];
 

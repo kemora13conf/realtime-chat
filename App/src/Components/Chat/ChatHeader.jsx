@@ -63,9 +63,7 @@ const ChatHeader = () => {
   return user == null ? null : (
     <div className="w-full h-fit flex items-center p-5 bg-secondary-800 rounded-t-[20px]">
       <img
-        src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${
-          user["profile-picture"]
-        }`}
+        src={`data:${user["profile-picture"].contentType};base64,${user["profile-picture"].data}`}
         className="w-[44px] h-[44px] rounded-full bg-quaternary-500 object-cover object-center shadow-profile"
       />
       <div className="flex flex-col ml-5">

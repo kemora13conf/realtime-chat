@@ -18,9 +18,7 @@ function SentMessage({ msg, user }) {
       <div className="h-[40px] aspect-square rounded-full bg-primary-500">
         <img
           className="w-full h-full rounded-full shadow-profile cursor-pointer object-cover"
-          src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${
-            user["profile-picture"]
-          }`}
+          src={`data:${user["profile-picture"].contentType};base64,${user["profile-picture"].data}`}
         />
       </div>
       <div className="flex flex-col gap-[5px] max-w-[250px] overflow-hidden">

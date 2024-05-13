@@ -8,6 +8,16 @@ export const answerObject = (type, message, data = null) => {
   };
 };
 
+export const SerializeUser = (user) => {
+  return {
+    ...user._doc,
+    "profile-picture": {
+      ...user["profile-picture"],
+      data: ConvertBufferToBase64(user["profile-picture"].data),
+    },
+  };
+}
+
 export const GetConversationByParticipantsOrCreateOne = async (
   participants
 ) => {
@@ -44,6 +54,8 @@ export const ConvertBufferToBase64 = (image) => {
 export const SerializeMessageContent = (message) => {
   return {
     ...message._doc,
+    sender: SerializeUser(message.sender),
+    receiver: SerializeUser(message.receiver),
     content: message.content.map((file) => {
       return {
         _id: file._id,

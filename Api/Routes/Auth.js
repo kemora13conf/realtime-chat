@@ -1,5 +1,4 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken";
 import {
   validateLoginData,
   login,
@@ -9,7 +8,7 @@ import {
   validateUsername,
   validateImageFile,
 } from "../Controllers/auth.js";
-import { answerObject } from "../Helpers/utils.js";
+import { SerializeUser, answerObject } from "../Helpers/utils.js";
 import upload from "../Controllers/multer-config.js";
 
 const authRouter = Router();
@@ -35,7 +34,9 @@ authRouter.post("/login", validateLoginData, login);
 authRouter.get("/verifyToken", requireSingin, (req, res) => {
   res
     .status(200)
-    .json(answerObject("success", "User Found!", req.current_user));
+    .json(
+      answerObject("success", "User Found!", SerializeUser(req.current_user))
+    );
 });
 
 export default authRouter;
