@@ -1,6 +1,6 @@
 import Database from "../Database.js";
 import Logger from "../Helpers/Logger.js";
-import { GetConversationByParticipantsOrCreateOne, answerObject } from "../Helpers/utils.js";
+import { GetConversationByParticipantsOrCreateOne, SerializeUser, answerObject } from "../Helpers/utils.js";
 import Users from "../Models/Users.js";
 import { io } from "../server.js";
 
@@ -8,7 +8,10 @@ export async function list(req, res) {
   await Database.getInstance();
   // get all the users and return them
   try {
-    const users = await Users.find({ _id: { $ne: req.current_user._id } });
+    let users = await Users.find({ _id: { $ne: req.current_user._id } });
+    users = users.map((user) => {
+      return SerializeUser(user);
+    });
     res.status(200).json(answerObject("success", "Users found", users));
   } catch (error) {
     res.status(500).json(answerObject("error", error.message));
@@ -68,7 +71,7 @@ export async function user(req, res) {
     });
 
     req.user = {
-      ...req.user._doc,
+      ...SerializeUser(req.user),
       conversation: conversation,
     };
     res.status(200).json(answerObject("success", "User found", req.user));

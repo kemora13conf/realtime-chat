@@ -1,7 +1,21 @@
 import mongoose from "mongoose";
 import CryptoJS from "crypto-js";
 import bcrypt from 'bcrypt';
-import { JWT_SECRET } from "../Config/index.js";
+import fs from 'fs';
+import path from 'path';
+import { __dirname } from "../App.js";
+
+// open the default-image.json file
+let DefaultImage = {};
+try {
+  DefaultImage = JSON.parse(fs.readFileSync(path.join(__dirname, './Models/default-image.json')));
+} catch (error) {
+  DefaultImage = {
+    data: Buffer.from([]),
+    contentType: "image/png",
+    fileName: "Avatar.png",
+  };
+}
 
 const { model, models } = mongoose;
 
@@ -39,8 +53,21 @@ const usersSchema = new mongoose.Schema(
       type: String,
     },
     "profile-picture": {
-      type: String,
-      default: "Avatar.png",
+      data: {
+        type: Buffer,
+        required: true,
+        default: Buffer.from(DefaultImage.data, "base64"),
+      },
+      contentType: {
+        type: String,
+        required: true,
+        default: DefaultImage.contentType
+      },
+      fileName: {
+        type: String,
+        required: true,
+        default: DefaultImage.fileName
+      },
     },
     last_seen: {
       type: Date,

@@ -85,9 +85,7 @@ function Conversation({ conversation }) {
                 }`}
     >
       <img
-        src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${
-          participant["profile-picture"]
-        }`}
+        src={`data:${participant["profile-picture"].contentType};base64,${participant["profile-picture"].data}`}
         className="w-[44px] h-[44px] rounded-full bg-quaternary-500 object-cover object-center shadow-profile"
       />
       <div className="flex flex-col">

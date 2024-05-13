@@ -10,9 +10,7 @@ function User({ user }) {
           transition-all duration-300 cursor-pointer hover:bg-primary-500 hover:bg-opacity-20"
     >
       <img
-        src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${
-          user["profile-picture"]
-        }`}
+        src={`data:${user["profile-picture"].contentType};base64,${user["profile-picture"].data}`}
         className="w-[44px] h-[44px] rounded-full bg-quaternary-500 object-cover object-center shadow-profile"
       />
       <div className="flex flex-col">

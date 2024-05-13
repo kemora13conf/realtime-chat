@@ -2,6 +2,7 @@ import Database from "../Database.js";
 import {
   GetConversationByParticipantsOrCreateOne,
   SerializeMessageContent,
+  SerializeUser,
   answerObject,
 } from "../Helpers/utils.js";
 import Conversations from "../Models/Conversations.js";
@@ -74,11 +75,11 @@ export const findReceiverById = async (req, res, next, id) => {
 };
 
 /**
- * 
- * @param {Request} req 
- * @param {Response} res 
- * @param {NextFunction} next 
- * @param {ObjectId} id 
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {NextFunction} next
+ * @param {ObjectId} id
  * @returns NotFoundError | InternalServerError
  */
 export const fileById = async (req, res, next, id) => {
@@ -100,14 +101,16 @@ export const get_file = async (req, res) => {
   try {
     const { file } = req;
     res.setHeader("Content-Type", file.contentType);
-    res.setHeader("Content-Disposition", `attachment; filename=${file.fileName}`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=${file.fileName}`
+    );
     res.send(file.message);
   } catch (err) {
     Logger.error(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
   }
 };
-
 
 /**
  *
@@ -157,6 +160,8 @@ export const conversations = async (req, res) => {
        */
       return {
         ...conversation._doc,
+        startedBy: SerializeUser(conversation.startedBy),
+        to: SerializeUser(conversation.to),
         last_message:
           conversation.last_message != null
             ? SerializeMessageContent(conversation.last_message)
@@ -219,8 +224,14 @@ export const messages = async (req, res) => {
     for (let message of unseenMessages) {
       message.status = MESSAGE_STATUS.SEEN;
       await message.save();
-      io.to(message.sender._id.toString()).emit("message-seen", message);
-      io.to(message.receiver._id.toString()).emit("message-seen", message);
+      io.to(message.sender._id.toString()).emit(
+        "message-seen",
+        SerializeMessageContent(message)
+      );
+      io.to(message.receiver._id.toString()).emit(
+        "message-seen",
+        SerializeMessageContent(message)
+      );
     }
 
     // decode Messages content
@@ -356,11 +367,11 @@ const storage = multer.memoryStorage(); // store the files in memory
 export const upload = multer({ storage: storage }); // initialize the multer
 
 /**
- * @function getFilename
+ * @function generateFilename
  * @param {String} originalname
  * @returns {String} Generated filename `RealTimeChat-timestamps.extension`
  */
-function getFilename(originalname) {
+export function generateFilename(originalname) {
   let arrName = originalname.split(".");
   let extension = arrName[arrName.length - 1];
   let timestamps = new Date();
@@ -398,7 +409,7 @@ export const new_message_image = async (req, res) => {
     const messageContent = await MessageContent.create({
       message: file.buffer,
       contentType: file.mimetype,
-      fileName: getFilename(file.originalname),
+      fileName: generateFilename(file.originalname),
       fileSize: file.size,
     });
 
@@ -471,7 +482,7 @@ export const new_message_files = async (req, res) => {
       const fileContent = await MessageContent.create({
         message: file.buffer,
         contentType: file.mimetype,
-        fileName: getFilename(file.originalname),
+        fileName: generateFilename(file.originalname),
         fileSize: file.size,
       });
       filesIds.push(fileContent._id);

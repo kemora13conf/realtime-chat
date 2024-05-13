@@ -17,9 +17,7 @@ export default function Card() {
       <div className="flex gap-[20px] w-full flex-col mt-[20px]">
         <div className="flex justify-between w-full items-center">
           <img
-            src={`${import.meta.env.VITE_ASSETS}/Profile-pictures/${
-              auth.user["profile-picture"]
-            }`}
+            src={`data:${auth.user["profile-picture"].contentType};base64,${auth.user["profile-picture"].data}`}
             className="w-24 h-24 rounded-full bg-quaternary-500 object-cover object-center shadow-profile"
           />
           <button

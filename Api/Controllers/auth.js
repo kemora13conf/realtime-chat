@@ -1,12 +1,11 @@
 import Users from "../Models/Users.js";
 import jwt from "jsonwebtoken";
-import { answerObject } from "../Helpers/utils.js";
+import { SerializeUser, answerObject } from "../Helpers/utils.js";
 import Database from "../Database.js";
 import { JWT_SECRET } from "../Config/index.js";
 import validator from "validator";
 import { __dirname } from "../App.js";
-import path from "path";
-import fs from "fs";
+import { generateFilename } from "./conversations.js";
 
 const validateUsername = async (req, res, next) => {
   await Database.getInstance();
@@ -61,22 +60,6 @@ const validateEmail = async (req, res, next) => {
   }
 };
 
-function getFilename(originalname) {
-  let arrName = originalname.split(".");
-  let extension = arrName[arrName.length - 1];
-  let nameWithoutExtension = arrName.slice(0, arrName.length - 1).join(".");
-  let saveAs = `${nameWithoutExtension}.${extension}`;
-  return saveAs;
-}
-
-function saveFile(file, location) {
-  let saveAs = getFilename(file.originalname);
-  let imageBuffer = file.buffer;
-  let filePath = path.join(__dirname, location, saveAs);
-  fs.writeFileSync(filePath, imageBuffer);
-  return saveAs;
-}
-
 // Middleware for validating image file upload
 export const validateImageFile = async (req, res, next) => {
   if (req.file) {
@@ -107,7 +90,11 @@ const register = async (req, res) => {
       hashed_password: req.body.password,
     });
     if (req.file) {
-      user["profile-picture"] = saveFile(req.file, "Assets/Profile-pictures");
+      user["profile-picture"] = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        fileName: generateFilename(req.file.originalname),
+      };
     }
     await user.save();
     return res
@@ -152,7 +139,7 @@ const login = async (req, res) => {
     req.user.salt = undefined;
     return res.status(200).json(
       answerObject("success", `Logged in successefully!`, {
-        user: req.user,
+        user: SerializeUser(req.user),
         token: token,
       })
     );
@@ -167,9 +154,9 @@ async function requireSingin(req, res, next) {
     let token = Authorization
       ? Authorization.split(" ")[1]
       : req.query.token
-        ? req.query.token
-        : null;
-    
+      ? req.query.token
+      : null;
+
     if (token !== null) {
       const verificationResponse = jwt.verify(token, JWT_SECRET);
       const userId = verificationResponse._id;
@@ -187,7 +174,6 @@ async function requireSingin(req, res, next) {
           .json(answerObject("error", "Wrong authentication token"));
       }
     } else {
-
       return res
         .status(404)
         .json(answerObject("error", "Authentication token missing"));
