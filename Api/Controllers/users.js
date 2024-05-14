@@ -1,6 +1,10 @@
 import Database from "../Database.js";
 import Logger from "../Helpers/Logger.js";
-import { GetConversationByParticipantsOrCreateOne, SerializeUser, answerObject } from "../Helpers/utils.js";
+import {
+  getConversationByParticipantsOrCreateOne,
+  SerializeUser,
+  answerObject,
+} from "../Helpers/utils.js";
 import Users from "../Models/Users.js";
 import { io } from "../server.js";
 
@@ -55,7 +59,7 @@ export async function findUserById(req, res, next, id) {
 
 /**
  * Controller to get the user
- * @param {Request} req 
+ * @param {Request} req
  * @param {Response} res
  * @returns {Response} response with answerObject
  */
@@ -65,10 +69,15 @@ export async function user(req, res) {
      * Get the conversation between the current user and the user
      * If the conversation does not exist, create a new conversation
      */
-    let conversation = await GetConversationByParticipantsOrCreateOne({
-      current_user: req.current_user,
-      user: req.user,
-    });
+    let conversation;
+    try {
+      conversation = await getConversationByParticipantsOrCreateOne({
+        current_user: req.current_user,
+        user: req.user,
+      });
+    } catch (error) {
+      return res.status(500).json(answerObject("error", error.message));
+    }
 
     req.user = {
       ...SerializeUser(req.user),
@@ -79,3 +88,20 @@ export async function user(req, res) {
     res.status(500).json(answerObject("error", error.message));
   }
 }
+
+export const userProfilePicture = async (req, res) => {
+  try {
+    await Database.getInstance();
+    const user = await Users.findOne({ _id: req.user._id }).select(
+      "profile-picture"
+    );
+    if (user["profile-picture"].data) {
+      res.set("Content-Type", user["profile-picture"].contentType);
+      return res.send(user["profile-picture"].data);
+    } else {
+      res.status(404).json(answerObject("error", "Profile picture not found"));
+    }
+  } catch (error) {
+    res.status(500).json(answerObject("error", error.message));
+  }
+};

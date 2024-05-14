@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import LastMessage from "../Messages/LastMessage.jsx";
 import UnreadMesssages from "./UnreadMesssages.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
+import Cookies from "js-cookie";
+
 import {
   updateLastMessageStatus,
   updateLastMessage,
   MoveToTop,
-} from "../../Store/Users/index.js";
+} from "../../Store/Global/index.js";
 
 function Conversation({ conversation }) {
   const currentUser = useSelector((state) => state.auth.user);
@@ -30,7 +32,7 @@ function Conversation({ conversation }) {
   };
   const onNewMessage = (message) => {
     dispatch(updateLastMessage(message));
-    dispatch(MoveToTop(conversation._id));
+    dispatch(MoveToTop(message.conversation));
     SocketContext.socket.emit("message-delivered", message);
   };
 
@@ -45,7 +47,6 @@ function Conversation({ conversation }) {
     } else {
       SocketContext.getSocket().on("connect", onConnect);
     }
-
     return () => {
       if (SocketContext.socket && SocketContext.socket.connected) {
         SocketContext.socket.off("new-message", updateLastMessage);
@@ -85,7 +86,9 @@ function Conversation({ conversation }) {
                 }`}
     >
       <img
-        src={`data:${participant["profile-picture"].contentType};base64,${participant["profile-picture"].data}`}
+        src={`${import.meta.env.VITE_API}/users/${
+          participant._id
+        }/profile-picture?token=${Cookies.get("jwt")}`}
         className="w-[44px] h-[44px] rounded-full bg-quaternary-500 object-cover object-center shadow-profile"
       />
       <div className="flex flex-col">

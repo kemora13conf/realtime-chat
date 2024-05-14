@@ -1,5 +1,5 @@
 import React from "react";
-import MessageStatus from "./MessageStatus.jsx";
+import MessageStatus from "./Pieces/MessageStatus.jsx";
 import { useSelector } from "react-redux";
 
 function LastMessage({ message }) {

@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
-import ImagesMessage from "./ImagesMessage";
-import FilesMessage from "./filesMessage";
+import ImageMessage from "./ImageMessage.jsx";
+import FileMessage from "./FileMessage.jsx";
+import Cookies from "js-cookie";
 
 function RecievedMessage({ msg, user }) {
   
@@ -16,24 +17,28 @@ function RecievedMessage({ msg, user }) {
     >
       <div className="h-[40px] aspect-square rounded-full bg-primary-500">
         <img
+          src={`${import.meta.env.VITE_API}/users/${
+            user._id
+          }/profile-picture?token=${Cookies.get("jwt")}`}
           className="w-full h-full rounded-full shadow-profile cursor-pointer object-cover"
-          src={`data:${user["profile-picture"].contentType};base64,${user["profile-picture"].data}`}
         />
       </div>
-      <div className="flex flex-col gap-[5px] max-w-[250px] overflow-hidden">
+      <div className="flex flex-col gap-[5px] max-w-[250px]">
         <div
           className="relative flex flex-col
-            rounded-xl bg-secondary-500 shadow-card
-            px-[15px] py-[12px] min-w-[200px] cursor-pointer"
+            rounded-xl bg-primary-500 cursor-pointer
+            px-[15px] py-[12px] min-w-[200px] overflow-hidden shadow-message
+            transition-all duration-300 ease-in-out
+            border border-secondary-500 hover:border-primary-400"
         >
           {msg.type === "TEXT" ? (
             <p className="text-quaternary-600 text-[14px] font-light">
               {msg.content[0].message}
             </p>
           ) : msg.type === "IMAGE" ? (
-            <ImagesMessage msg={msg} />
+            <ImageMessage msg={msg} />
           ) : (
-            <FilesMessage msg={msg} />
+            <FileMessage msg={msg} />
           )}
         </div>
         <div className="flex gap-1 text-tertiary-600 font-light text-[13px] pl-[5px]">

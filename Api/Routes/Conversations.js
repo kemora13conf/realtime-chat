@@ -6,7 +6,7 @@ import {
   messages,
   new_message,
   new_message_image,
-  new_message_files,
+  new_message_file,
   upload,
   unread_messages,
   fileById,
@@ -33,10 +33,10 @@ router.post(
   new_message_image
 ); // Route to send a new image message
 router.post(
-  "/:username/message/files",
+  "/:username/message/file",
   requireSingin,
-  upload.array("files"),
-  new_message_files
+  upload.single("file"),
+  new_message_file
 ); // Route to send a new files message
 
 export default router;

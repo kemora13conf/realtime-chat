@@ -24,6 +24,7 @@ function App() {
               <Route element={<BaseLayout />}>
                 <Route path="register" element={<Register />} />
                 <Route path="login" element={<Login />} />
+                
                 <Route element={<Home />}>
                   <Route index element={<EmptyChat />} />
                   <Route path="conversation/:id" element={<Chat />} />

@@ -19,7 +19,7 @@ import {
 } from "../../Store/Chat/index.js";
 import EmptyChat from "./EmptyChat.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
-import { updateLastMessageStatus } from "../../Store/Users/index.js";
+import { updateLastMessageStatus } from "../../Store/Global/index.js";
 
 export default function Chat() {
   const chat = useSelector((state) => state.chat);
