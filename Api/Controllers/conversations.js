@@ -1,9 +1,9 @@
 import Database from "../Database.js";
 import {
-  GetConversationByParticipantsOrCreateOne,
   SerializeMessageContent,
   SerializeUser,
   answerObject,
+  getConversationByParticipantsOrCreateOne,
 } from "../Helpers/utils.js";
 import Conversations from "../Models/Conversations.js";
 import Messages, { MESSAGE_STATUS, MESSAGE_TYPES } from "../Models/Messages.js";
@@ -181,8 +181,7 @@ export const conversations = async (req, res) => {
       })
     );
   } catch (err) {
-    console.log(err);
-    return res.status(500).json(answerObject("error", "Internal server error"));
+    return res.status(500).json(answerObject("error", "Internal server error",[]));
   }
 };
 
@@ -196,10 +195,15 @@ export const messages = async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   try {
     await Database.getInstance();
-    let conversation = await GetConversationByParticipantsOrCreateOne({
+    let conversation;
+    try {
+      conversation = await getConversationByParticipantsOrCreateOne({
       current_user: req.current_user,
       user: req.receiver,
     });
+    } catch (error) {
+      return res.status(500).json(answerObject("error", error.message, []));
+    }
 
     /**
      * Here we need to do reversed pagination
@@ -309,10 +313,15 @@ export const new_message = async (req, res) => {
      * or create a new one if it doesn't exist
      */
     const { current_user, receiver } = req;
-    let conversation = await GetConversationByParticipantsOrCreateOne({
+    let conversation;
+    try{
+      conversation = await getConversationByParticipantsOrCreateOne({
       current_user,
       user: receiver,
     });
+    } catch (error) {
+      return res.status(500).json(answerObject("error", error.message));
+    }
 
     /**
      * Now we can save the message and update the last_message field
@@ -398,10 +407,15 @@ export const new_message_image = async (req, res) => {
      * We need first to get the conversation between the two users
      * or create a new one if it doesn't exist
      */
-    let conversation = await GetConversationByParticipantsOrCreateOne({
+    let conversation;
+    try{
+      conversation = await getConversationByParticipantsOrCreateOne({
       current_user,
       user: receiver,
     });
+    } catch (error) {
+      return res.status(500).json(answerObject("error", error.message));
+    }
 
     const { file } = req; // get the image file from the request
 
@@ -458,7 +472,7 @@ export const new_message_image = async (req, res) => {
  * @param {Response} res
  * @returns HttpResponse with Message | InternalServerError
  */
-export const new_message_files = async (req, res) => {
+export const new_message_file = async (req, res) => {
   try {
     await Database.getInstance();
     /**
@@ -466,35 +480,36 @@ export const new_message_files = async (req, res) => {
      * or create a new one if it doesn't exist
      */
     const { current_user, receiver } = req;
-    let conversation = await GetConversationByParticipantsOrCreateOne({
+    let conversation;
+    try{
+      conversation = await getConversationByParticipantsOrCreateOne({
       current_user,
       user: receiver,
     });
+    } catch (error) {
+      return res.status(500).json(answerObject("error", error.message));
+    }
 
-    const { files } = req; // get the files from the request
+    const { file } = req; // get the files from the request
 
     /**
-     * Create a new message content for each file
+     * Create a new message content for file
      * and save the file in the database
      */
-    let filesIds = []; // store the ids of each MessageContent
-    for (let file of files) {
-      const fileContent = await MessageContent.create({
-        message: file.buffer,
-        contentType: file.mimetype,
-        fileName: generateFilename(file.originalname),
-        fileSize: file.size,
-      });
-      filesIds.push(fileContent._id);
-    }
+    const fileContent = await MessageContent.create({
+      message: file.buffer,
+      contentType: file.mimetype,
+      fileName: generateFilename(file.originalname),
+      fileSize: file.size,
+    });
 
     // create a new message
     const message = new Messages({
-      sender: sender._id,
+      sender: current_user._id,
       receiver: receiver._id,
       conversation: conversation._id,
       type: "FILE",
-      content: filesIds,
+      content: [fileContent._id],
     });
     await message.save();
 
@@ -508,7 +523,7 @@ export const new_message_files = async (req, res) => {
       SerializeMessageContent(message)
     );
     // Emit the new message to the sender
-    io.to(sender._id.toString()).emit(
+    io.to(current_user._id.toString()).emit(
       "new-message",
       SerializeMessageContent(message)
     );
@@ -522,6 +537,7 @@ export const new_message_files = async (req, res) => {
         )
       );
   } catch (err) {
+    Logger.error(err);
     return res.status(500).json(answerObject("error", "Internal server error"));
   }
 };

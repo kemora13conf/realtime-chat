@@ -4,6 +4,7 @@ import {
   list,
   user,
   isUserOnline,
+  userProfilePicture,
 } from "../Controllers/users.js";
 import { requireSingin } from '../Controllers/auth.js';
 
@@ -14,5 +15,6 @@ router.param('id', findUserById);
 router.get('/', requireSingin, list);
 router.get('/:id/status', requireSingin, isUserOnline);
 router.get('/:id', requireSingin, user);
+router.get('/:id/profile-picture', requireSingin, userProfilePicture);
 
 export default router;

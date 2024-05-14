@@ -4,10 +4,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { AddMessage } from "../../Store/Chat/index.js";
 import { toast } from "react-toastify";
 import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
-import ImageModal from "./imageModal.jsx";
-import FilesModal from "./filesModal.jsx";
 import { AnimatePresence } from "framer-motion";
-import { MoveToTop, updateLastMessage } from "../../Store/Users/index.js";
+import { MoveToTop, updateLastMessage } from "../../Store/Global/index.js";
+import ImageModal from "./Modals/imageModal.jsx";
+import FilesModal from "./Modals/FilesModal.jsx";
 
 export default function MessageForm() {
   const currentUser = useSelector((state) => state.auth.user);
@@ -52,7 +52,7 @@ export default function MessageForm() {
     );
     if (response.ok) {
       const res = await response.json();
-      if (res.type == 'success') {
+      if (res.type == "success") {
         dispatch(AddMessage(res.data));
         dispatch(updateLastMessage(res.data));
         dispatch(MoveToTop(res.data.conversation));
@@ -60,17 +60,16 @@ export default function MessageForm() {
     } else {
       toast.error("Failed to send message");
     }
-
   }
-  
+
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
       <AnimatePresence mode="out-in">
         {chatForm.isFilesModalOpen && (
-        <FilesModal files={files} setFiles={setFiles} />
-      )}
-      {chatForm.isImageModalOpen && (
-        <ImageModal image={image} setImage={setImage} />
+          <FilesModal files={files} setFiles={setFiles} />
+        )}
+        {chatForm.isImageModalOpen && (
+          <ImageModal image={image} setImage={setImage} />
         )}
       </AnimatePresence>
       <div

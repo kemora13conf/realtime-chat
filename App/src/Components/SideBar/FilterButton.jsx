@@ -5,25 +5,26 @@ import {
   setUsersFilter,
   fetchUsers,
   fetchConversations,
-} from "../../Store/Users/index.js";
+} from "../../Store/Global/index.js";
 
 function FilterButton() {
   const auth = useSelector((state) => state.auth);
-  const users = useSelector((state) => state.users);
+  const global = useSelector((state) => state.global);
   const dispatch = useDispatch();
   return (
     <div
       className="w-full rounded-[15px] py-[5px]
-                bg-primary-500 relative min-h-[50px] shadow-card"
+                bg-primary-500 relative min-h-[50px] shadow-profile
+                border border-secondary-500"
     >
       {/* indicator */}
       <div
         className={`w-[calc(calc(100%/2)-10px)] h-[40px] bg-primary-700 
-          absolute top-[5px] left-[5px] rounded-[10px] transition-all duration-300 ease-in-out
-          inside-shadow`}
+          absolute top-[4px] left-[4px] rounded-[10px] transition-all duration-300 ease-in-out
+          inside-shadow border border-secondary-500`}
         style={{
           transform: `translateX(${
-            users.usersFilter === USERS_FILTER.USERS
+            global.usersFilter === USERS_FILTER.USERS
               ? "calc(100% + 10px)"
               : "0"
           })`,

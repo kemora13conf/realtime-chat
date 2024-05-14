@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import Conversation from "./Conversation.jsx";
 import UserSkeleton from "../Skeletons/UserSkeleton.jsx";
 import { useSelector } from "react-redux";
 
 function ConversationsList() {
-  const users = useSelector((state) => state.users);
+  const global = useSelector((state) => state.global);
   
   return (
     <motion.div
@@ -15,7 +15,7 @@ function ConversationsList() {
       transition={{ duration: 0.3 }}
       className="w-full flex flex-col gap-[15px]"
     >
-      {users.isConversationsFetching ? (
+      {global.isConversationsFetching ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -26,8 +26,8 @@ function ConversationsList() {
           <UserSkeleton />
           <UserSkeleton />
         </motion.div>
-      ) : users.conversations.length > 0 ? (
-        users.conversations.map((conversation) => (
+      ) : global.conversations.length > 0 ? (
+        global.conversations.map((conversation) => (
           <Conversation
             key={
               conversation.last_message

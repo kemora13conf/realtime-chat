@@ -1,18 +1,13 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import socketContext from "../../Context/LoadSocket.js";
-import {
-  USERS_FILTER,
-  fetchConversations,
-  fetchUsers,
-} from "../../Store/Users/index.js";
+import { useSelector } from "react-redux";
+
 import User from "./User.jsx";
 import { AnimatePresence, motion } from "framer-motion";
 import UserSkeleton from "../Skeletons/UserSkeleton.jsx";
 
 function UsersList() {
   const auth = useSelector((state) => state.auth);
-  const users = useSelector((state) => state.users);
+  const global = useSelector((state) => state.global);
 
   return (
     <motion.div
@@ -22,7 +17,7 @@ function UsersList() {
       transition={{ duration: 0.3 }}
       className="w-full flex flex-col gap-[15px]"
     >
-      {users.isUsersFetching ? (
+      {global.isUsersFetching ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -33,8 +28,8 @@ function UsersList() {
           <UserSkeleton />
           <UserSkeleton />
         </motion.div>
-      ) : users.users.length > 0 ? (
-        users.users?.map((user) => <User key={user._id} user={user} />)
+      ) : global.users.length > 0 ? (
+        global.users?.map((user) => <User key={user._id} user={user} />)
       ) : (
         <div className="flex flex-col gap-[5px] p-[10px]">
           <h2 className="text-center text-quaternary-500 font-['Montserrat'] font-light">

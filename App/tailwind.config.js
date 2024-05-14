@@ -54,6 +54,7 @@ export default {
     boxShadow: {
       profile: 'rgba(0, 0, 0,.5) 0px 20px 30px -10px',
       card: 'rgba(0, 0, 0,.3 ) 0px 20px 30px -10px',
+      message: 'rgba(0, 0, 0, 0.4) 0px 50px 100px -20px, rgba(0, 0, 0, 0.5) 0px 30px 60px -30px'
     },
   },
   plugins: [

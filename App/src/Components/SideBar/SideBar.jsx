@@ -8,18 +8,18 @@ import {
   USERS_FILTER,
   fetchConversations,
   fetchUsers,
-} from "../../Store/Users/index.js";
+} from "../../Store/Global/index.js";
 import ConversationsList from "./ConversationsList.jsx";
 
 export default function SideBar({ bounds }) {
-  const users = useSelector((state) => state.users);
+  const global = useSelector((state) => state.global);
   const chat = useSelector((state) => state.chat);
   const currentUser = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(
-      users.usersFilter === USERS_FILTER.USERS
+      global.usersFilter === USERS_FILTER.USERS
         ? fetchUsers()
         : fetchConversations()
     );
@@ -35,7 +35,7 @@ export default function SideBar({ bounds }) {
       <CurrentUser />
       <FilterButton />
       <AnimatePresence mode="wait">
-        {users.usersFilter == USERS_FILTER.USERS ? (
+        {global.usersFilter == USERS_FILTER.USERS ? (
           <UsersList />
         ) : (
           <ConversationsList />

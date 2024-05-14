@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 function User({ user }) {
   return (
@@ -10,7 +11,9 @@ function User({ user }) {
           transition-all duration-300 cursor-pointer hover:bg-primary-500 hover:bg-opacity-20"
     >
       <img
-        src={`data:${user["profile-picture"].contentType};base64,${user["profile-picture"].data}`}
+        src={`${import.meta.env.VITE_API}/users/${
+          user._id
+        }/profile-picture?token=${Cookies.get("jwt")}`}
         className="w-[44px] h-[44px] rounded-full bg-quaternary-500 object-cover object-center shadow-profile"
       />
       <div className="flex flex-col">
