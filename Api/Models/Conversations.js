@@ -64,7 +64,7 @@ conversationsSchema.pre("save", async function (next) {
 });
 
 // we need to make the pair of StartedBy and To unique
-conversationsSchema.index({ startedBy: 1, to: 1 }, { unique: true });
+conversationsSchema.index({ startedBy: 1, to: 1 }, { unique: true, name: "unique_pair"});
 
 // populate last_message on find and findOne methods
 conversationsSchema.pre("find", function () {

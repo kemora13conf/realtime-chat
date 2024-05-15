@@ -5,7 +5,6 @@ import { AddMessage } from "../../Store/Chat/index.js";
 import { toast } from "react-toastify";
 import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
 import { AnimatePresence } from "framer-motion";
-import { MoveToTop, updateLastMessage } from "../../Store/Global/index.js";
 import ImageModal from "./Modals/imageModal.jsx";
 import FilesModal from "./Modals/FilesModal.jsx";
 
@@ -54,8 +53,6 @@ export default function MessageForm() {
       const res = await response.json();
       if (res.type == "success") {
         dispatch(AddMessage(res.data));
-        dispatch(updateLastMessage(res.data));
-        dispatch(MoveToTop(res.data.conversation));
       }
     } else {
       toast.error("Failed to send message");

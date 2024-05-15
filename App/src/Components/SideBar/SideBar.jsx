@@ -3,27 +3,19 @@ import CurrentUser from "./CurrentUserCard.jsx";
 import FilterButton from "./FilterButton.jsx";
 import UsersList from "./UsersList.jsx";
 import { AnimatePresence } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  USERS_FILTER,
-  fetchConversations,
-  fetchUsers,
-} from "../../Store/Global/index.js";
+import { useSelector } from "react-redux";
+
+export const USERS_FILTER = {
+  MESSAGES: "Messages",
+  USERS: "Users",
+};
+
 import ConversationsList from "./ConversationsList.jsx";
 
 export default function SideBar({ bounds }) {
-  const global = useSelector((state) => state.global);
   const chat = useSelector((state) => state.chat);
-  const currentUser = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(
-      global.usersFilter === USERS_FILTER.USERS
-        ? fetchUsers()
-        : fetchConversations()
-    );
-  }, []);
+ const [usersFilter, setUsersFilter] = useState(USERS_FILTER.MESSAGES);
+  
   return (
     <div
       className={`w-full max-h-screen 
@@ -33,9 +25,9 @@ export default function SideBar({ bounds }) {
       @[600px]/home:max-w-[300px] `}
     >
       <CurrentUser />
-      <FilterButton />
+      <FilterButton {...{ usersFilter, setUsersFilter }} />
       <AnimatePresence mode="wait">
-        {global.usersFilter == USERS_FILTER.USERS ? (
+        {usersFilter == USERS_FILTER.USERS ? (
           <UsersList />
         ) : (
           <ConversationsList />

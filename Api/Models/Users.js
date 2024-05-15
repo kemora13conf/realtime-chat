@@ -95,10 +95,10 @@ usersSchema.methods = {
 
 // on find or findOne remove the hashed_password and salt and profile-picture.data
 usersSchema.pre("find", function () {
-  this.select("-hashed_password -salt -profile-picture.data");
+  this.select("-profile-picture.data");
 });
 usersSchema.pre("findOne", function () {
-  this.select("-hashed_password -salt -profile-picture.data");
+  this.select("-profile-picture.data");
 });
 
 export default models.Users || model("Users", usersSchema);

@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { AddMessage } from "../../../Store/Chat/index.js";
 import { toast } from "react-toastify";
-import { MoveToTop, updateLastMessage } from "../../../Store/Global/index.js";
 
 export const generateSize = (size) => {
   if (size < 1000) {
@@ -55,8 +54,6 @@ function FilePreview({ file, setFiles, isSend, setIsSend }) {
           const res = JSON.parse(response.responseText);
           if (res.type === "success") {
             dispatch(AddMessage(res.data));
-            dispatch(updateLastMessage(res.data));
-            dispatch(MoveToTop(res.data.conversation));
             setFiles((prev) => {
               return Array.from(prev).filter((f) => f.name !== file.name);
             });

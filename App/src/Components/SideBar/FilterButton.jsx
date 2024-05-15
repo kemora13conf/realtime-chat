@@ -1,16 +1,8 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  USERS_FILTER,
-  setUsersFilter,
-  fetchUsers,
-  fetchConversations,
-} from "../../Store/Global/index.js";
+import { USERS_FILTER } from "./SideBar.jsx"
 
-function FilterButton() {
-  const auth = useSelector((state) => state.auth);
-  const global = useSelector((state) => state.global);
-  const dispatch = useDispatch();
+
+function FilterButton({ usersFilter, setUsersFilter }) {
   return (
     <div
       className="w-full rounded-[15px] py-[5px]
@@ -24,7 +16,7 @@ function FilterButton() {
           inside-shadow border border-secondary-500`}
         style={{
           transform: `translateX(${
-            global.usersFilter === USERS_FILTER.USERS
+            usersFilter === USERS_FILTER.USERS
               ? "calc(100% + 10px)"
               : "0"
           })`,
@@ -33,8 +25,7 @@ function FilterButton() {
       <div className="w-full flex items-center absolute z-10">
         <button
           onClick={() => {
-            dispatch(setUsersFilter(USERS_FILTER.MESSAGES));
-            dispatch(fetchConversations());
+            setUsersFilter(USERS_FILTER.MESSAGES);
           }}
           className="w-full h-[40px] text-tertiary-500 outline-none border-none"
         >
@@ -42,8 +33,7 @@ function FilterButton() {
         </button>
         <button
           onClick={() => {
-            dispatch(setUsersFilter(USERS_FILTER.USERS));
-            dispatch(fetchUsers());
+            setUsersFilter(USERS_FILTER.USERS);
           }}
           className="w-full h-[40px] text-tertiary-500"
         >

@@ -6,13 +6,12 @@ import UnreadMesssages from "./UnreadMesssages.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
 import Cookies from "js-cookie";
 
-import {
+function Conversation({
+  conversation,
   updateLastMessageStatus,
-  updateLastMessage,
   MoveToTop,
-} from "../../Store/Global/index.js";
-
-function Conversation({ conversation }) {
+  updateLastMessage,
+}) {
   const currentUser = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
 
@@ -28,11 +27,11 @@ function Conversation({ conversation }) {
     conversation.last_message && conversation.last_message.status === "SEEN";
 
   const update_last_message = (message) => {
-    dispatch(updateLastMessageStatus(message));
+    updateLastMessageStatus(message);
   };
   const onNewMessage = (message) => {
-    dispatch(updateLastMessage(message));
-    dispatch(MoveToTop(message.conversation));
+    updateLastMessage(message);
+    MoveToTop(message.conversation);
     SocketContext.socket.emit("message-delivered", message);
   };
 
@@ -65,12 +64,10 @@ function Conversation({ conversation }) {
          * dispatch an action to update the message status to seen
          */
         if (!amIlastMessageSender && !isLastMessageSeen) {
-          dispatch(
-            updateLastMessageStatus({
-              ...conversation.last_message,
-              status: "SEEN",
-            })
-          );
+          updateLastMessageStatus({
+            ...conversation.last_message,
+            status: "SEEN",
+          });
         }
       }}
       to={`/conversation/${participant.username}`}

@@ -1,12 +1,64 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Conversation from "./Conversation.jsx";
 import UserSkeleton from "../Skeletons/UserSkeleton.jsx";
-import { useSelector } from "react-redux";
+import Cookies from "js-cookie";
 
 function ConversationsList() {
-  const global = useSelector((state) => state.global);
-  
+  const [isConversationsFetching, setIsConversationsFetching] = useState(false);
+  const [conversations, setConversations] = useState([]);
+
+  const fetchConversations = async () => {
+    setIsConversationsFetching(true);
+    let url = `${import.meta.env.VITE_API}/conversations`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${Cookies.get("jwt")}`,
+      },
+    });
+    const res = await response.json();
+    if(res.type === "success") {
+      setConversations(res.data.conversations ? res.data.conversations : []);
+    }
+    setIsConversationsFetching(false);
+  };
+
+  const updateLastMessage = (message) => {
+    const conversation = conversations.find(
+      (conversation) => conversation._id === message.conversation
+    );
+    if (conversation) {
+      conversation.last_message = message;
+    }
+  }
+
+  const MoveToTop = (conversationId) => {
+    const conversation = conversations.find(
+      (conversation) => conversation._id === conversationId
+    );
+    if (conversation) {
+      setConversations(
+        conversations.filter(
+          (conversation) => conversation._id !== conversationId
+        )
+      );
+      setConversations([conversation, ...conversations]);
+    }
+  }
+
+  const updateLastMessageStatus = (message) => {
+    const conversation = conversations.find(
+      (conversation) => conversation._id === message.conversation
+    );
+    if (conversation) {
+      conversation.last_message = message;
+    }
+  }
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -15,7 +67,7 @@ function ConversationsList() {
       transition={{ duration: 0.3 }}
       className="w-full flex flex-col gap-[15px]"
     >
-      {global.isConversationsFetching ? (
+      {isConversationsFetching ? (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -26,15 +78,20 @@ function ConversationsList() {
           <UserSkeleton />
           <UserSkeleton />
         </motion.div>
-      ) : global.conversations.length > 0 ? (
-        global.conversations.map((conversation) => (
+      ) : conversations.length > 0 ? (
+        conversations.map((conversation) => (
           <Conversation
             key={
               conversation.last_message
                 ? conversation.last_message.updatedAt
                 : conversation._id
             }
-            conversation={conversation}
+            {...{
+              conversation,
+              updateLastMessageStatus,
+              MoveToTop,
+              updateLastMessage,
+            }}
           />
         ))
       ) : (

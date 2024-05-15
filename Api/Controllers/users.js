@@ -8,15 +8,37 @@ import {
 import Users from "../Models/Users.js";
 import { io } from "../server.js";
 
+/**
+ * @function list - Controller to list all users with pagination
+ * @param {Request} req
+ * @param {Response} res
+ */
 export async function list(req, res) {
-  await Database.getInstance();
-  // get all the users and return them
   try {
-    let users = await Users.find({ _id: { $ne: req.current_user._id } });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    await Database.getInstance();
+    let users = await Users.find({ _id: { $ne: req.current_user._id } })
+      .select("username profile-picture last_seen")
+      .skip(skip)
+      .limit(limit)
+      .sort({ last_seen: -1 });
+    const totalDocs = await Users.countDocuments({
+      _id: { $ne: req.current_user._id },
+    });
     users = users.map((user) => {
       return SerializeUser(user);
     });
-    res.status(200).json(answerObject("success", "Users found", users));
+    res.status(200).json(answerObject("success", "Users found", {
+      users,
+      pagination: {
+        page,
+        limit,
+        pages: Math.ceil(totalDocs / limit),
+        total: totalDocs,
+      },
+    }));
   } catch (error) {
     res.status(500).json(answerObject("error", error.message));
   }

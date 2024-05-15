@@ -19,7 +19,6 @@ import {
 } from "../../Store/Chat/index.js";
 import EmptyChat from "./EmptyChat.jsx";
 import SocketContext from "../../Context/LoadSocket.js";
-import { updateLastMessageStatus } from "../../Store/Global/index.js";
 
 export default function Chat() {
   const chat = useSelector((state) => state.chat);
@@ -40,7 +39,6 @@ export default function Chat() {
       if (message.sender._id === user._id) {
         if (message.receiver._id === currentUser._id) {
           dispatch(AddMessage(message));
-          dispatch(updateLastMessageStatus({...message, status: "SEEN" } ));
 
           /**
            * Emit Seen event to the server to update the message status

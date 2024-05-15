@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import Cookies from "js-cookie";
 import { AddMessage } from "../../../Store/Chat/index.js";
 import { motion } from "framer-motion";
-import { MoveToTop, updateLastMessage } from "../../../Store/Global/index.js";
 import SendButton from "../Pieces/SendButton.jsx";
 import { generateSize } from "../Previews/FilePreview.jsx";
 
@@ -37,8 +36,6 @@ function ImageModal({ image, setImage }) {
         const res = JSON.parse(response.responseText);
         if (res.type === "success") {
           dispatch(AddMessage(res.data));
-          dispatch(updateLastMessage(res.data));
-          dispatch(MoveToTop(res.data.conversation));
           setImage(null);
           dispatch(closeImageModal());
         } else {
