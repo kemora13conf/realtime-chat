@@ -13,7 +13,7 @@ function SentMessage({ msg, user }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 10 }}
       transition={{ duration: 0.3 }}
-      key={msg._id + msg.status}
+      key={msg._id}
       className="flex gap-4 flex-row-reverse ml-auto"
     >
       <div className="h-[40px] aspect-square rounded-full bg-primary-500">

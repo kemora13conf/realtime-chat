@@ -1,11 +1,10 @@
 import React from "react";
-import { USERS_FILTER } from "./SideBar.jsx"
-
+import { USERS_FILTER } from "./SideBar.jsx";
 
 function FilterButton({ usersFilter, setUsersFilter }) {
   return (
     <div
-      className="w-full rounded-[15px] py-[5px]
+      className="w-full rounded-[15px] items-center flex justify-center
                 bg-primary-500 relative min-h-[50px] shadow-profile
                 border border-secondary-500"
     >
@@ -16,9 +15,7 @@ function FilterButton({ usersFilter, setUsersFilter }) {
           inside-shadow border border-secondary-500`}
         style={{
           transform: `translateX(${
-            usersFilter === USERS_FILTER.USERS
-              ? "calc(100% + 10px)"
-              : "0"
+            usersFilter === USERS_FILTER.USERS ? "calc(100% + 10px)" : "0"
           })`,
         }}
       />
@@ -27,17 +24,31 @@ function FilterButton({ usersFilter, setUsersFilter }) {
           onClick={() => {
             setUsersFilter(USERS_FILTER.MESSAGES);
           }}
-          className="w-full h-[40px] text-tertiary-500 outline-none border-none"
+          className={`w-full h-[40px] 
+          ${
+            usersFilter === USERS_FILTER.MESSAGES
+              ? "text-quaternary-600"
+              : "text-tertiary-600"
+          }
+          border-none flex items-center gap-[10px] justify-center transition-all duration-300 ease-in-out`}
         >
-          {USERS_FILTER.MESSAGES}
+          <i className="fas fa-comments text-sm"></i>
+          <p className="text-sm">{USERS_FILTER.MESSAGES}</p>
         </button>
         <button
           onClick={() => {
             setUsersFilter(USERS_FILTER.USERS);
           }}
-          className="w-full h-[40px] text-tertiary-500"
+          className={`w-full h-[40px] 
+          ${
+            usersFilter === USERS_FILTER.USERS
+              ? "text-quaternary-600"
+              : "text-tertiary-600"
+          }
+          border-none flex items-center gap-[10px] justify-center transition-all duration-300 ease-in-out`}
         >
-          {USERS_FILTER.USERS}
+          <i className="fas fa-users text-sm"></i>
+          <p className="text-sm">{USERS_FILTER.USERS}</p>
         </button>
       </div>
     </div>

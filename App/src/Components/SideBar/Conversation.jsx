@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import LastMessage from "../Messages/LastMessage.jsx";
 import UnreadMesssages from "./UnreadMesssages.jsx";
@@ -8,12 +8,12 @@ import Cookies from "js-cookie";
 
 function Conversation({
   conversation,
-  updateLastMessageStatus,
+  updateLastMessageStatusToDelivered,
+  updateLastMessageStatusToSeen,
   MoveToTop,
   updateLastMessage,
 }) {
   const currentUser = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch();
 
   const participant =
     conversation.startedBy._id === currentUser._id
@@ -26,9 +26,6 @@ function Conversation({
   const isLastMessageSeen =
     conversation.last_message && conversation.last_message.status === "SEEN";
 
-  const update_last_message = (message) => {
-    updateLastMessageStatus(message);
-  };
   const onNewMessage = (message) => {
     updateLastMessage(message);
     MoveToTop(message.conversation);
@@ -37,8 +34,20 @@ function Conversation({
 
   const onConnect = () => {
     SocketContext.socket.on("new-message", onNewMessage);
-    SocketContext.socket.on("message-seen", update_last_message);
-    SocketContext.socket.on("message-delivered", update_last_message);
+    SocketContext.socket.on("message-seen", updateLastMessageStatusToSeen);
+    SocketContext.socket.on(
+      "message-delivered",
+      updateLastMessageStatusToDelivered
+    );
+  };
+
+  const onDisconnect = () => {
+    SocketContext.socket.off("new-message", onNewMessage);
+    SocketContext.socket.off("message-seen", updateLastMessageStatusToSeen);
+    SocketContext.socket.off(
+      "message-delivered",
+      updateLastMessageStatusToDelivered
+    );
   };
   useEffect(() => {
     if (SocketContext.socket && SocketContext.socket.connected) {
@@ -48,9 +57,7 @@ function Conversation({
     }
     return () => {
       if (SocketContext.socket && SocketContext.socket.connected) {
-        SocketContext.socket.off("new-message", updateLastMessage);
-        SocketContext.socket.off("message-seen", updateLastMessage);
-        SocketContext.socket.off("message-delivered", updateLastMessage);
+        onDisconnect();
       }
     };
   }, []);
@@ -64,7 +71,7 @@ function Conversation({
          * dispatch an action to update the message status to seen
          */
         if (!amIlastMessageSender && !isLastMessageSeen) {
-          updateLastMessageStatus({
+          updateLastMessageStatusToSeen({
             ...conversation.last_message,
             status: "SEEN",
           });

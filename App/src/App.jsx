@@ -12,6 +12,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EmptyChat from "./Layout/App/EmptyChat.jsx";
 import Chat from "./Layout/App/Chat.jsx";
+import Profile from "./Layout/App/Profile.jsx";
 
 function App() {
   return (
@@ -35,6 +36,11 @@ function App() {
                     key={"chat-key"}
                     path="conversation/:id"
                     element={<Chat />}
+                  />
+                  <Route
+                    key={"profile-key"}
+                    path="profile"
+                    element={<Profile />}
                   />
 
                   <Route

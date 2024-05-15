@@ -1,21 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { closeImageModal } from "../../../Store/Chat/chatForm.js";
 import { toast } from "react-toastify";
 import Cookies from "js-cookie";
-import { AddMessage } from "../../../Store/Chat/index.js";
 import { motion } from "framer-motion";
 import SendButton from "../Pieces/SendButton.jsx";
 import { generateSize } from "../Previews/FilePreview.jsx";
 
-function ImageModal({ image, setImage }) {
-  const user = useSelector((state) => state.chat.openedChat.user);
+function ImageModal({ image, setImage, AddMessage, setIsImageModalOpen, user }) {
   const [isSending, setIsSending] = useState(false);
   const [progress, setProgress] = useState(0);
-  const dispatch = useDispatch();
+
   const closeImage = () => {
     setImage(null);
-    dispatch(closeImageModal());
+    setIsImageModalOpen(false);
+    return null;
   };
   const sendImage = async () => {
     setIsSending(true);
@@ -24,7 +21,9 @@ function ImageModal({ image, setImage }) {
     const response = new XMLHttpRequest();
     response.open(
       "POST",
-      `${import.meta.env.VITE_API}/conversations/${user.username}/message/image`,
+      `${import.meta.env.VITE_API}/conversations/${
+        user.username
+      }/message/image`,
       true
     );
     response.setRequestHeader("Authorization", `Bearer ${Cookies.get("jwt")}`);
@@ -35,9 +34,8 @@ function ImageModal({ image, setImage }) {
       if (response.status === 200 && response.readyState === 4) {
         const res = JSON.parse(response.responseText);
         if (res.type === "success") {
-          dispatch(AddMessage(res.data));
-          setImage(null);
-          dispatch(closeImageModal());
+          AddMessage(res.data);
+          closeImage();
         } else {
           toast.error("An error occured while sending the file", {
             theme: "dark",
@@ -58,8 +56,7 @@ function ImageModal({ image, setImage }) {
        * if no image is selected, close the modal
        */
       if (!image) {
-        dispatch(closeImageModal());
-        setImage(null);
+        closeImage();
       }
     }
   }, [image]);
@@ -123,11 +120,7 @@ function ImageModal({ image, setImage }) {
       </div>
     </motion.div>
   ) : (
-    (() => {
-      dispatch(closeImageModal());
-      setImage(null);
-      return null;
-    })()
+    closeImage()
   );
 }
 

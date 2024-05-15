@@ -10,6 +10,7 @@ import { argv } from "process";
 import jwt from "jsonwebtoken";
 import { __dirname } from "./App.js";
 import Messages, { MESSAGE_STATUS } from "./Models/Messages.js";
+import { SerializeMessageContent } from "./Helpers/utils.js";
 
 // getting args from the command line
 const args = argv.slice(2);
@@ -85,10 +86,10 @@ io.on("connection", (socket) => {
         msg.status = MESSAGE_STATUS.DELIVERED;
         await msg.save();
 
-        await msg.populate("sender", "username profile-picture");
-        await msg.populate("receiver", "username profile-picture");
-
-        io.to(String(msg.sender._id)).emit("message-delivered", msg);
+        io.to(String(msg.sender._id)).emit(
+          "message-delivered",
+          SerializeMessageContent(msg)
+        );
       }
     } catch (error) {
       console.log(error.message);
@@ -107,7 +108,10 @@ io.on("connection", (socket) => {
         await msg.populate("sender", "username profile-picture");
         await msg.populate("receiver", "username profile-picture");
 
-        io.to(msg.sender._id.toString()).emit("message-seen", msg);
+        io.to(msg.sender._id.toString()).emit(
+          "message-seen",
+          SerializeMessageContent(msg)
+        );
       }
     } catch (error) {
       console.log(error.message);

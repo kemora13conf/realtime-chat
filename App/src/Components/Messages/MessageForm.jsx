@@ -1,19 +1,16 @@
 import { useState } from "react";
 import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
-import { AddMessage } from "../../Store/Chat/index.js";
 import { toast } from "react-toastify";
-import { openFilesModal, openImageModal } from "../../Store/Chat/chatForm.js";
 import { AnimatePresence } from "framer-motion";
 import ImageModal from "./Modals/imageModal.jsx";
 import FilesModal from "./Modals/FilesModal.jsx";
 
-export default function MessageForm() {
-  const currentUser = useSelector((state) => state.auth.user);
-  const user = useSelector((state) => state.chat.openedChat.user);
-  const chatForm = useSelector((state) => state.chatForm);
-  const dispatch = useDispatch();
+export default function MessageForm({ AddMessage, user }) {
 
+  const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  
   const [msg, setMsg] = useState("");
   const [files, setFiles] = useState(null);
   const [image, setImage] = useState(null);
@@ -21,13 +18,13 @@ export default function MessageForm() {
   function importFiles(e) {
     if (e.target.files.length > 0) {
       setFiles(e.target.files);
-      dispatch(openFilesModal());
+      setIsFilesModalOpen(true);
     }
   }
   function importImage(e) {
     if (e.target.files.length > 0) {
       setImage(e.target.files[0]);
-      dispatch(openImageModal());
+      setIsImageModalOpen(true);
     }
   }
 
@@ -52,7 +49,7 @@ export default function MessageForm() {
     if (response.ok) {
       const res = await response.json();
       if (res.type == "success") {
-        dispatch(AddMessage(res.data));
+        AddMessage(res.data);
       }
     } else {
       toast.error("Failed to send message");
@@ -62,11 +59,23 @@ export default function MessageForm() {
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
       <AnimatePresence mode="out-in">
-        {chatForm.isFilesModalOpen && (
-          <FilesModal files={files} setFiles={setFiles} />
+        {isFilesModalOpen && (
+          <FilesModal {...{
+            files,
+            setFiles,
+            user,
+            AddMessage,
+            setIsFilesModalOpen,
+          }} />
         )}
-        {chatForm.isImageModalOpen && (
-          <ImageModal image={image} setImage={setImage} />
+        {isImageModalOpen && (
+          <ImageModal {...{
+            image,
+            setImage,
+            user,
+            AddMessage,
+            setIsImageModalOpen,
+          }} />
         )}
       </AnimatePresence>
       <div
@@ -85,7 +94,7 @@ export default function MessageForm() {
             onChange={importFiles}
             id="file"
             multiple
-            disabled={chatForm.isFilesModalOpen || chatForm.isImageModalOpen}
+            disabled={isFilesModalOpen || isImageModalOpen}
           />
         </label>
         <label
@@ -100,7 +109,8 @@ export default function MessageForm() {
             accept="image/*"
             onChange={importImage}
             id="image"
-            disabled={chatForm.isFilesModalOpen || chatForm.isImageModalOpen}
+
+            disabled={isFilesModalOpen || isImageModalOpen}
           />
         </label>
       </div>
@@ -120,7 +130,7 @@ export default function MessageForm() {
         />
         <button
           type="submit"
-          disabled={chatForm.isFilesModalOpen || chatForm.isImageModalOpen}
+          disabled={isFilesModalOpen || isImageModalOpen}
           className="w-[48px] h-[48px] rounded-full
             flex justify-center items-center transition-all group
             absolute right-0"

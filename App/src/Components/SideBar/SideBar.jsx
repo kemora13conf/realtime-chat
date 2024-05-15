@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import CurrentUser from "./CurrentUserCard.jsx";
+import { useState } from "react";
+import CurrentUser from "./currentUserCard/CurrentUserCard.jsx";
 import FilterButton from "./FilterButton.jsx";
 import UsersList from "./UsersList.jsx";
 import { AnimatePresence } from "framer-motion";
-import { useSelector } from "react-redux";
 
 export const USERS_FILTER = {
   MESSAGES: "Messages",
@@ -11,15 +10,17 @@ export const USERS_FILTER = {
 };
 
 import ConversationsList from "./ConversationsList.jsx";
+import { useParams } from "react-router-dom";
 
 export default function SideBar({ bounds }) {
-  const chat = useSelector((state) => state.chat);
- const [usersFilter, setUsersFilter] = useState(USERS_FILTER.MESSAGES);
-  
+  const [usersFilter, setUsersFilter] = useState(USERS_FILTER.MESSAGES);
+
+  const param = useParams();
+
   return (
     <div
       className={`w-full max-h-screen 
-      ${bounds.width > 720 ? "flex" : chat.openedChat.user ? "hidden" : "flex"} 
+      ${bounds.width > 720 ? "flex" : param.id ? "hidden" : "flex"} 
       flex-col items-center gap-5 p-[10px]
       transition-all duration-300 ease-in-out
       @[600px]/home:max-w-[300px] `}

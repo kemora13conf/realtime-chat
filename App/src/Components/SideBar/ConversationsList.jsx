@@ -18,43 +18,65 @@ function ConversationsList() {
       },
     });
     const res = await response.json();
-    if(res.type === "success") {
+    if (res.type === "success") {
       setConversations(res.data.conversations ? res.data.conversations : []);
     }
     setIsConversationsFetching(false);
   };
 
   const updateLastMessage = (message) => {
-    const conversation = conversations.find(
-      (conversation) => conversation._id === message.conversation
-    );
-    if (conversation) {
-      conversation.last_message = message;
-    }
-  }
+    setConversations((prev) => {
+      const conversation = prev.find(
+        (conversation) => conversation._id === message.conversation
+      );
+      if (conversation) {
+        conversation.last_message = message;
+      }
+      return [...prev];
+    });
+  };
 
   const MoveToTop = (conversationId) => {
-    const conversation = conversations.find(
-      (conversation) => conversation._id === conversationId
-    );
-    if (conversation) {
-      setConversations(
-        conversations.filter(
-          (conversation) => conversation._id !== conversationId
-        )
+    setConversations((prevConversations) => {
+      const conversation = prevConversations.find(
+        (conversation) => conversation._id === conversationId
       );
-      setConversations([conversation, ...conversations]);
-    }
-  }
+      if (conversation) {
+        prevConversations.splice(prevConversations.indexOf(conversation), 1);
+        prevConversations.unshift(conversation);
+      }
+      return [...prevConversations];
+    });
+  };
 
-  const updateLastMessageStatus = (message) => {
-    const conversation = conversations.find(
-      (conversation) => conversation._id === message.conversation
+  const updateLastMessageStatusToSeen = (message) => {
+    setConversations((prevConversations) =>
+      prevConversations.map((conversation) => {
+        if (
+          conversation._id === message.conversation &&
+          conversation.last_message._id === message._id
+        ) {
+          conversation.last_message.status = "SEEN";
+        }
+        return conversation;
+      })
     );
-    if (conversation) {
-      conversation.last_message = message;
-    }
-  }
+  };
+
+  const updateLastMessageStatusToDelivered = (message) => {
+    setConversations((prevConversations) =>
+      prevConversations.map((conversation) => {
+        if (
+          conversation._id === message.conversation &&
+          conversation.last_message._id === message._id &&
+          conversation.last_message.status !== "SEEN"
+        ) {
+          conversation.last_message.status = "DELIVERED";
+        }
+        return conversation;
+      })
+    );
+  };
 
   useEffect(() => {
     fetchConversations();
@@ -65,7 +87,7 @@ function ConversationsList() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-full flex flex-col gap-[15px]"
+      className="w-full flex flex-col gap-[15px] min-h-[400px] overflow-y-auto"
     >
       {isConversationsFetching ? (
         <motion.div
@@ -81,14 +103,11 @@ function ConversationsList() {
       ) : conversations.length > 0 ? (
         conversations.map((conversation) => (
           <Conversation
-            key={
-              conversation.last_message
-                ? conversation.last_message.updatedAt
-                : conversation._id
-            }
+            key={conversation._id}
             {...{
               conversation,
-              updateLastMessageStatus,
+              updateLastMessageStatusToDelivered,
+              updateLastMessageStatusToSeen,
               MoveToTop,
               updateLastMessage,
             }}

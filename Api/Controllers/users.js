@@ -103,7 +103,11 @@ export async function user(req, res) {
 
     req.user = {
       ...SerializeUser(req.user),
-      conversation: conversation,
+      conversation: {
+        ...conversation._doc,
+        startedBy: SerializeUser(conversation.startedBy),
+        to: SerializeUser(conversation.to),
+      },
     };
     res.status(200).json(answerObject("success", "User found", req.user));
   } catch (error) {

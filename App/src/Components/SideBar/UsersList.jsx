@@ -34,7 +34,7 @@ function UsersList() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="w-full flex flex-col gap-[15px]"
+      className="w-full flex flex-col gap-[15px] min-h-[400px] overflow-y-auto"
     >
       {isUsersFetching ? (
         <motion.div
