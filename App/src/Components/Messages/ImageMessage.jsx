@@ -44,8 +44,8 @@ function ImageMessage({ msg }) {
           cursor-pointer rounded-[10px]"
         >
           <i className="fas fa-download"></i>
-          {msg.content[0].fileName.length > 17
-            ? msg.content[0].fileName.substring(0, 14) +
+          {msg.content[0].fileName.length > 15
+            ? msg.content[0].fileName.substring(0, 11) +
               "..." +
               msg.content[0].fileName.slice(-3)
             : msg.content[0].fileName}

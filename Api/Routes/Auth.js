@@ -8,6 +8,7 @@ import {
   validateUsername,
   validateImageFile,
 } from "../Controllers/auth.js";
+
 import { SerializeUser, answerObject } from "../Helpers/utils.js";
 import upload from "../Controllers/multer-config.js";
 
@@ -22,6 +23,7 @@ authRouter.post(
       .json(answerObject("success", "Username and Email are available!"));
   }
 );
+
 authRouter.post(
   "/register",
   upload.single("image"),

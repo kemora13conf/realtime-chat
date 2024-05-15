@@ -73,6 +73,7 @@
 }
 body{
   scroll-behavior: smooth;
+  @apply bg-primary-700 max-h-[100svh];
 }
 
 .wait-500{

@@ -347,8 +347,24 @@ export const new_message = async (req, res) => {
     conversation.last_message = message._id;
     await conversation.save();
 
+    /**
+     * Get all the unread messages of the user in the conversation
+     * and add them to the message object
+     */
+    const unreadMessages = await Messages.find({
+      conversation: conversation._id,
+      receiver: message.receiver._id,
+      status: { $ne: MESSAGE_STATUS.SEEN },
+    });
+    message.unreadMessages = unreadMessages.length;
+
     // Emit the new message to the receiver
     io.to(receiver._id.toString()).emit(
+      "new-message",
+      SerializeMessageContent(message)
+    );
+    // Emit the new message to the sender
+    io.to(current_user._id.toString()).emit(
       "new-message",
       SerializeMessageContent(message)
     );

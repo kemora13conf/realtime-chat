@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { closeFilesModal } from "../../../Store/Chat/chatForm.js";
 import { motion } from "framer-motion";
 import FilePreview from "../Previews/FilePreview.jsx";
 import SendButton from "../Pieces/SendButton.jsx";
 
-function FilesModal({ files, setFiles }) {
-  const user = useSelector((state) => state.chat.openedChat.user);
+function FilesModal({ files, setFiles, AddMessage, setIsFilesModalOpen, user }) {
   const [isSend, setIsSend] = useState(false);
-  const dispatch = useDispatch();
   const sendFiles = async () => {
     setIsSend(true);
   };
@@ -18,7 +15,7 @@ function FilesModal({ files, setFiles }) {
        * if no files are selected, close the modal
        */
       if (files.length === 0) {
-        dispatch(closeFilesModal());
+        setIsFilesModalOpen(false);
         setFiles(null);
       }
     }
@@ -48,6 +45,8 @@ function FilesModal({ files, setFiles }) {
                   setFiles,
                   isSend,
                   setIsSend,
+                  user,
+                  AddMessage,
                 }}
               />
             ))}
@@ -64,8 +63,8 @@ function FilesModal({ files, setFiles }) {
     </motion.div>
   ) : (
     (() => {
-        dispatch(closeFilesModal());
-        setFiles(null);
+      setIsFilesModalOpen(false);
+      setFiles(null);
       return null;
     })()
   );

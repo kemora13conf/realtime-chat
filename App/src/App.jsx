@@ -12,6 +12,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import EmptyChat from "./Layout/App/EmptyChat.jsx";
 import Chat from "./Layout/App/Chat.jsx";
+import Profile from "./Layout/App/Profile.jsx";
 
 function App() {
   return (
@@ -22,14 +23,31 @@ function App() {
           <Routes>
             <Route path="/*">
               <Route element={<BaseLayout />}>
-                <Route path="register" element={<Register />} />
-                <Route path="login" element={<Login />} />
-                
-                <Route element={<Home />}>
-                  <Route index element={<EmptyChat />} />
-                  <Route path="conversation/:id" element={<Chat />} />
+                <Route
+                  key={"register-key"}
+                  path="register"
+                  element={<Register />}
+                />
+                <Route key={"login-key"} path="login" element={<Login />} />
 
-                  <Route path="*" element={<EmptyChat />} />
+                <Route key={"home-key"} element={<Home />}>
+                  <Route key={"emty-chat-key"} index element={<EmptyChat />} />
+                  <Route
+                    key={"chat-key"}
+                    path="conversation/:id"
+                    element={<Chat />}
+                  />
+                  <Route
+                    key={"profile-key"}
+                    path="profile"
+                    element={<Profile />}
+                  />
+
+                  <Route
+                    key={"somewhere-else-key"}
+                    path="*"
+                    element={<EmptyChat />}
+                  />
                 </Route>
               </Route>
             </Route>

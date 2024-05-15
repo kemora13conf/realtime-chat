@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
-import { AddMessage } from "../../../Store/Chat/index.js";
 import { toast } from "react-toastify";
-import { MoveToTop, updateLastMessage } from "../../../Store/Global/index.js";
 
 export const generateSize = (size) => {
   if (size < 1000) {
@@ -15,9 +13,7 @@ export const generateSize = (size) => {
   }
 };
 
-function FilePreview({ file, setFiles, isSend, setIsSend }) {
-  const user = useSelector((state) => state.chat.openedChat.user);
-  const dispatch = useDispatch();
+function FilePreview({ file, setFiles, isSend, setIsSend, AddMessage, user }) {
 
   const [progress, setProgress] = useState(0);
   const [isSending, setIsSending] = useState(false);
@@ -54,9 +50,7 @@ function FilePreview({ file, setFiles, isSend, setIsSend }) {
         if (response.status === 200 && response.readyState === 4) {
           const res = JSON.parse(response.responseText);
           if (res.type === "success") {
-            dispatch(AddMessage(res.data));
-            dispatch(updateLastMessage(res.data));
-            dispatch(MoveToTop(res.data.conversation));
+            AddMessage(res.data);
             setFiles((prev) => {
               return Array.from(prev).filter((f) => f.name !== file.name);
             });

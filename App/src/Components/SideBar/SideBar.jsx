@@ -1,41 +1,34 @@
-import { useEffect, useState } from "react";
-import CurrentUser from "./CurrentUserCard.jsx";
+import { useState } from "react";
+import CurrentUser from "./currentUserCard/CurrentUserCard.jsx";
 import FilterButton from "./FilterButton.jsx";
 import UsersList from "./UsersList.jsx";
 import { AnimatePresence } from "framer-motion";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  USERS_FILTER,
-  fetchConversations,
-  fetchUsers,
-} from "../../Store/Global/index.js";
+
+export const USERS_FILTER = {
+  MESSAGES: "Messages",
+  USERS: "Users",
+};
+
 import ConversationsList from "./ConversationsList.jsx";
+import { useParams } from "react-router-dom";
 
 export default function SideBar({ bounds }) {
-  const global = useSelector((state) => state.global);
-  const chat = useSelector((state) => state.chat);
-  const currentUser = useSelector((state) => state.auth.user);
-  const dispatch = useDispatch();
+  const [usersFilter, setUsersFilter] = useState(USERS_FILTER.MESSAGES);
 
-  useEffect(() => {
-    dispatch(
-      global.usersFilter === USERS_FILTER.USERS
-        ? fetchUsers()
-        : fetchConversations()
-    );
-  }, []);
+  const param = useParams();
+
   return (
     <div
       className={`w-full max-h-screen 
-      ${bounds.width > 720 ? "flex" : chat.openedChat.user ? "hidden" : "flex"} 
+      ${bounds.width > 720 ? "flex" : param.id ? "hidden" : "flex"} 
       flex-col items-center gap-5 p-[10px]
       transition-all duration-300 ease-in-out
       @[600px]/home:max-w-[300px] `}
     >
       <CurrentUser />
-      <FilterButton />
+      <FilterButton {...{ usersFilter, setUsersFilter }} />
       <AnimatePresence mode="wait">
-        {global.usersFilter == USERS_FILTER.USERS ? (
+        {usersFilter == USERS_FILTER.USERS ? (
           <UsersList />
         ) : (
           <ConversationsList />

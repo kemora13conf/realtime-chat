@@ -1,19 +1,10 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  USERS_FILTER,
-  setUsersFilter,
-  fetchUsers,
-  fetchConversations,
-} from "../../Store/Global/index.js";
+import { USERS_FILTER } from "./SideBar.jsx";
 
-function FilterButton() {
-  const auth = useSelector((state) => state.auth);
-  const global = useSelector((state) => state.global);
-  const dispatch = useDispatch();
+function FilterButton({ usersFilter, setUsersFilter }) {
   return (
     <div
-      className="w-full rounded-[15px] py-[5px]
+      className="w-full rounded-[15px] items-center flex justify-center
                 bg-primary-500 relative min-h-[50px] shadow-profile
                 border border-secondary-500"
     >
@@ -24,30 +15,40 @@ function FilterButton() {
           inside-shadow border border-secondary-500`}
         style={{
           transform: `translateX(${
-            global.usersFilter === USERS_FILTER.USERS
-              ? "calc(100% + 10px)"
-              : "0"
+            usersFilter === USERS_FILTER.USERS ? "calc(100% + 10px)" : "0"
           })`,
         }}
       />
       <div className="w-full flex items-center absolute z-10">
         <button
           onClick={() => {
-            dispatch(setUsersFilter(USERS_FILTER.MESSAGES));
-            dispatch(fetchConversations());
+            setUsersFilter(USERS_FILTER.MESSAGES);
           }}
-          className="w-full h-[40px] text-tertiary-500 outline-none border-none"
+          className={`w-full h-[40px] 
+          ${
+            usersFilter === USERS_FILTER.MESSAGES
+              ? "text-quaternary-600"
+              : "text-tertiary-600"
+          }
+          border-none flex items-center gap-[10px] justify-center transition-all duration-300 ease-in-out`}
         >
-          {USERS_FILTER.MESSAGES}
+          <i className="fas fa-comments text-sm"></i>
+          <p className="text-sm">{USERS_FILTER.MESSAGES}</p>
         </button>
         <button
           onClick={() => {
-            dispatch(setUsersFilter(USERS_FILTER.USERS));
-            dispatch(fetchUsers());
+            setUsersFilter(USERS_FILTER.USERS);
           }}
-          className="w-full h-[40px] text-tertiary-500"
+          className={`w-full h-[40px] 
+          ${
+            usersFilter === USERS_FILTER.USERS
+              ? "text-quaternary-600"
+              : "text-tertiary-600"
+          }
+          border-none flex items-center gap-[10px] justify-center transition-all duration-300 ease-in-out`}
         >
-          {USERS_FILTER.USERS}
+          <i className="fas fa-users text-sm"></i>
+          <p className="text-sm">{USERS_FILTER.USERS}</p>
         </button>
       </div>
     </div>

@@ -104,6 +104,7 @@ const register = async (req, res) => {
     return res.status(500).json(answerObject("error", error.message));
   }
 };
+
 const validateLoginData = async (req, res, next) => {
   try {
     const db = await Database.getInstance();
@@ -131,6 +132,7 @@ const validateLoginData = async (req, res, next) => {
     return res.status(500).json(answerObject("error", err.message));
   }
 };
+
 const login = async (req, res) => {
   try {
     await Database.getInstance();
