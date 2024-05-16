@@ -76,74 +76,72 @@ export default function Chat() {
   }, [user]);
 
   return (
-    user && (
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
-        key={user?._id}
-        className="w-full flex flex-col items-stretch overflow-y-auto bg-secondary-700
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      key={user?._id}
+      className="w-full min-h-[calc(100svh-40px)] flex flex-col items-stretch overflow-y-auto bg-secondary-700
             rounded-[20px] shadow-lg border border-primary-500"
-      >
-        {isLoading ? (
-          <ChatLoading />
-        ) : (
-          <>
-            <ChatHeader {...{ user }} />
-            <div
-              ref={chatRef}
-              className="w-full h-full max-h-[100svh] overflow-y-auto p-3 md:p-5"
-            >
-              <div className="w-full h-fit min-h-[] flex flex-col items-start gap-2">
-                <AnimatePresence>
-                  {isMessagesFetching ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="w-full flex flex-col gap-[15px]"
-                    >
-                      <SentMessageSkeleton />
-                      <RecievedMessageSkeleton />
-                      <SentMessageSkeleton />
-                      <RecievedMessageSkeleton />
-                    </motion.div>
-                  ) : (
-                    messages.map((message) => {
-                      if (message.sender._id === current_user._id) {
-                        return (
-                          <SentMessage
-                            key={message._id}
-                            user={current_user}
-                            msg={message}
-                          />
-                        );
-                      } else {
-                        return (
-                          <RecievedMessage
-                            key={message._id}
-                            user={user}
-                            msg={message}
-                          />
-                        );
-                      }
-                    })
-                  )}
-                </AnimatePresence>
-              </div>
+    >
+      {isLoading ? (
+        <ChatLoading />
+      ) : (
+        <>
+          <ChatHeader {...{ user }} />
+          <div
+            ref={chatRef}
+            className="w-full h-full max-h-[100svh] overflow-y-auto p-3 md:p-5"
+          >
+            <div className="w-full h-fit min-h-[] flex flex-col items-start gap-2">
+              <AnimatePresence>
+                {isMessagesFetching ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full flex flex-col gap-[15px]"
+                  >
+                    <SentMessageSkeleton />
+                    <RecievedMessageSkeleton />
+                    <SentMessageSkeleton />
+                    <RecievedMessageSkeleton />
+                  </motion.div>
+                ) : (
+                  messages.map((message) => {
+                    if (message.sender._id === current_user._id) {
+                      return (
+                        <SentMessage
+                          key={message._id}
+                          user={current_user}
+                          msg={message}
+                        />
+                      );
+                    } else {
+                      return (
+                        <RecievedMessage
+                          key={message._id}
+                          user={user}
+                          msg={message}
+                        />
+                      );
+                    }
+                  })
+                )}
+              </AnimatePresence>
             </div>
-            <MessageForm
-              {...{
-                user,
-                messages,
-                AddMessage,
-              }}
-            />
-          </>
-        )}
-      </motion.div>
-    )
+          </div>
+          <MessageForm
+            {...{
+              user,
+              messages,
+              AddMessage,
+            }}
+          />
+        </>
+      )}
+    </motion.div>
   );
 }
