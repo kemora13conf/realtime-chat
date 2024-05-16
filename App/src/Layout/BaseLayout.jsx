@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useNavigate } from "react-router-dom";
-import Home from "./App/Home";
 import { useDispatch, useSelector } from "react-redux";
 import Spinner from "../Components/Spinner";
 import { AnimatePresence, motion } from "framer-motion";
 import Cookies from "js-cookie";
 import Auth, { login, logout } from "../Store/Auth/index.js";
 import { loading as GlobalLoading } from "../Store/Global/index.js";
-import SocketContext from "../Context/LoadSocket.js";
 
 function BaseLayout() {
   const global = useSelector((state) => state.global);

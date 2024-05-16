@@ -33,6 +33,18 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.user = action.payload;
     },
+    updateUserProfile: (state, action) => {
+      state.user = {
+        ...state.user,
+        "profile-picture": action.payload,
+      };
+    },
+    updateUserInformation: (state, action) => {
+      state.user = {
+        ...state.user,
+        ...action.payload,
+      };
+    },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
@@ -58,5 +70,7 @@ export const {
   logout,
   setRegistrationStep,
   setRegistrationData,
+  updateUserProfile,
+  updateUserInformation,
 } = authSlice.actions;
 export default authSlice.reducer;

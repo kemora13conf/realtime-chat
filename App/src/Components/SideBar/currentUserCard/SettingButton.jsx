@@ -1,15 +1,21 @@
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../Store/Auth/index.js";
 import { useNavigate } from "react-router-dom";
 import SocketContext from "../../../Context/LoadSocket.js";
+import { useOutsideClickHook } from "../../../Hooks/useOutsideClickHook.js";
 
 function SettingButton() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const ref = useRef(null);
+
+  useOutsideClickHook(ref, () => {
+    setIsMenuOpen(false);
+  });
 
   const signOut = () => {
     SocketContext.getSocket().disconnect();
@@ -45,6 +51,7 @@ function SettingButton() {
               duration: 0.15,
               ease: "easeOut",
             }}
+            ref={ref}
             className="w-[250px] h-fit absolute z-50 top-[44px]
             bg-primary-500 overflow-hidden
             border border-secondary-500 shadow-lg

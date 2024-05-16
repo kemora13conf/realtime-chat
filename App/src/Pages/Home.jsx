@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import useMeasure from "react-use-measure";
-import SideBar from "../../Components/SideBar/SideBar.jsx";
-import { motion } from "framer-motion";
-import ChatContainer from "../../Components/Chat/ChatContainer.jsx";
+import SideBar from "../Layout/App/SideBar.jsx";
+import ChatContainer from "../Layout/App/ChatContainer.jsx";
 import { useDispatch, useSelector } from "react-redux";
-import { loading as GlobalLoading } from "../../Store/Global/index.js";
-import socketContext from "../../Context/LoadSocket.js";
+import { loading as GlobalLoading } from "../Store/Global/index.js";
 
 export default function Home() {
   const [ref, bounds] = useMeasure();
@@ -21,7 +19,7 @@ export default function Home() {
   const containerRef = useRef(null);
 
   const toggleFullscreen = () => {
-    if(bounds.width < 520) {
+    if (bounds.width < 520) {
       if (!document.fullscreenElement) {
         containerRef.current.requestFullscreen();
       }
@@ -43,7 +41,7 @@ export default function Home() {
     auth.user && (
       <div
         ref={containerRef}
-        onClick={toggleFullscreen}
+        // onClick={toggleFullscreen}
         key={"Home"}
         className="w-full max-h-[100svh] min-h-[100svh] md:min-h-screen bg-primary-700 flex justify-center items-center 
       px-[10px] lg:px-0"
