@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -7,7 +7,7 @@ import ImageModal from "./Modals/imageModal.jsx";
 import FilesModal from "./Modals/FilesModal.jsx";
 
 export default function MessageForm({ AddMessage, user }) {
-
+  const inputRef = useRef(null);
   const [isFilesModalOpen, setIsFilesModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   
@@ -55,7 +55,12 @@ export default function MessageForm({ AddMessage, user }) {
       toast.error("Failed to send message");
     }
   }
-
+  useEffect(() => {
+    /**
+     * if the message input is focused i need to emit a typing event
+     * if the message input is not focused i need to emit a stop typing event
+     */
+  }, []);
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
       <AnimatePresence mode="out-in">
@@ -119,6 +124,7 @@ export default function MessageForm({ AddMessage, user }) {
         className="w-full flex items-center relative"
       >
         <input
+          ref={inputRef}
           type="text"
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
