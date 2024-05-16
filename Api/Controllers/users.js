@@ -30,15 +30,17 @@ export async function list(req, res) {
     users = users.map((user) => {
       return SerializeUser(user);
     });
-    res.status(200).json(answerObject("success", "Users found", {
-      users,
-      pagination: {
-        page,
-        limit,
-        pages: Math.ceil(totalDocs / limit),
-        total: totalDocs,
-      },
-    }));
+    res.status(200).json(
+      answerObject("success", "Users found", {
+        users,
+        pagination: {
+          page,
+          limit,
+          pages: Math.ceil(totalDocs / limit),
+          total: totalDocs,
+        },
+      })
+    );
   } catch (error) {
     res.status(500).json(answerObject("error", error.message));
   }
@@ -115,6 +117,13 @@ export async function user(req, res) {
   }
 }
 
+/**
+ * @function userProfilePicture
+ * @description Controller to get the profile picture of the user
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} response with answerObject
+ */
 export const userProfilePicture = async (req, res) => {
   try {
     await Database.getInstance();
@@ -127,6 +136,127 @@ export const userProfilePicture = async (req, res) => {
     } else {
       res.status(404).json(answerObject("error", "Profile picture not found"));
     }
+  } catch (error) {
+    res.status(500).json(answerObject("error", error.message));
+  }
+};
+
+/**
+ * @function updateProfilePicture
+ * @description Controller to update the profile picture of the user
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} response with answerObject
+ */
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const { current_user, file } = req;
+    if (!file) {
+      return res
+        .status(200)
+        .json(answerObject("image", "Please upload an image"));
+    } else {
+      const { mimetype, size } = file;
+      const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+      const maxSize = 1024 * 1024 * 2; // 2MB
+
+      // Check if file is an image and size is within limit
+      if (!allowedTypes.includes(mimetype)) {
+        return res
+          .status(200)
+          .json(answerObject("image", "Only images are allowed"));
+      } else if (size > maxSize) {
+        return res
+          .status(200)
+          .json(answerObject("image", "Image size should not exceed 2MB"));
+      }
+    }
+    await Database.getInstance();
+    const user = await Users.findOne({ _id: current_user._id }).select(
+      "profile-picture"
+    );
+    user["profile-picture"] = {
+      data: file.buffer,
+      contentType: file.mimetype,
+      fileName: file.originalname,
+    };
+    await user.save();
+    res.status(200).json(answerObject("success", "Profile picture updated"));
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(answerObject("error", error.message));
+  }
+};
+
+/**
+ * @function updateUserInformation
+ * @description Controller to update the user information
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} response with answerObject
+ */
+export const updateUserInformation = async (req, res) => {
+  try {
+    const { current_user } = req;
+    await Database.getInstance();
+    const user = await Users.findOne({ _id: current_user._id });
+    user.username = req.body.username;
+    user.email = req.body.email;
+    await user.save();
+    res.status(200).json(answerObject("success", "User updated successfully"));
+  } catch (error) {
+    res.status(500).json(answerObject("error", error.message));
+  }
+};
+
+/**
+ * @function updatePassword
+ * @description Controller to update the user password
+ * @param {Request} req
+ * @param {Response} res
+ * @returns {Response} response with answerObject
+ */
+export const updateUserPassword = async (req, res) => {
+  try {
+    await Database.getInstance();
+    let { current_user } = req;
+    const { current_password, new_password, confirm_password } = req.body;
+    current_user = await Users.findOne({ _id: current_user._id })
+      .select("hashed_password salt");
+    
+    if (!current_password) {
+      return res
+        .status(200)
+        .json(answerObject("current_password", "Current password is required"));
+    } else if (!current_user.isPasswordMatch(current_password)) {
+      return res
+        .status(200)
+        .json(answerObject("current_password", "Incorrect password"));
+    } else if (!new_password) {
+      return res
+        .status(200)
+        .json(answerObject("new_password", "New password is required"));
+    } else if (
+      !new_password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/)
+    ) {
+      return res
+        .status(200)
+        .json(
+          answerObject(
+            "new_password",
+            "Password must be at least 8 characters long and contain at least one lowercase letter, one uppercase letter, and one number"
+          )
+        );
+    } else if (new_password !== confirm_password) {
+      return res
+        .status(200)
+        .json(answerObject("confirm_password", "Passwords do not match"));
+    }
+    current_user.hashed_password = new_password;
+    await current_user.save();
+    res
+      .status(200)
+      .json(answerObject("success", "Password updated successfully"));
   } catch (error) {
     res.status(500).json(answerObject("error", error.message));
   }

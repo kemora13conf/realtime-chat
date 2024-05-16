@@ -1,5 +1,5 @@
 import React from "react";
-import { USERS_FILTER } from "./SideBar.jsx";
+import { USERS_FILTER } from "../../Layout/App/SideBar.jsx";
 
 function FilterButton({ usersFilter, setUsersFilter }) {
   return (

@@ -1,20 +1,21 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
-import { Outlet, useParams } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { closeImage } from "../../Store/Global/index.js";
 import Cookies from "js-cookie";
 
 export default function ChatContainer({ bounds }) {
   const global = useSelector((state) => state.global);
-  const param = useParams();
   const dispatch = useDispatch();
+  const location = useLocation();
+  const isNotHome = location.pathname !== "/";
   return (
     <motion.div
       initial={{ x: 500 }}
       animate={{ x: 0 }}
       exit={{ x: 500 }}
       className={`w-full
-        ${bounds.width > 720 ? "flex" : param.id ? "flex" : "hidden"}
+        ${bounds.width > 720 ? "flex" : isNotHome ? "flex" : "hidden"}
          items-stretch py-[20px] md:p-[20px] max-h-[100svh] md:max-h-screen relative
         `}
     >

@@ -2,17 +2,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { Provider } from "react-redux";
 import "./App.css";
-import Register from "./Layout/Auth/Register.jsx";
-import Login from "./Layout/Auth/Login.jsx";
-import Home from "./Layout/App/Home.jsx";
+import Register from "./Pages/Auth/Register.jsx";
+import Login from "./Pages/Auth/Login.jsx";
+import Home from "./Pages/Home.jsx";
 import BaseLayout from "./Layout/BaseLayout";
 import Store from "./Store/Store.js";
-import Protected from "./Components/Protection/ProtectedRoute.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import EmptyChat from "./Layout/App/EmptyChat.jsx";
-import Chat from "./Layout/App/Chat.jsx";
-import Profile from "./Layout/App/Profile.jsx";
+import EmptyChat from "./Pages/EmptyChat.jsx";
+import Chat from "./Pages/Chat.jsx";
+import Profile from "./Pages/Profile.jsx";
 
 function App() {
   return (
