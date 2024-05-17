@@ -120,6 +120,22 @@ io.on("connection", (socket) => {
   });
 
   /**
+   * Listen for typing event
+   * @listens typing
+   * @description When a user is typing, the event is broadcasted to the receiver
+   * @param {Object} data
+   * @param {string} data.id The receiver id
+   * @param {Boolean} data.isTyping The typing status
+   * @returns {void} broadcast the typing event to the receiver
+   */
+  socket.on("typing", (data) => {
+    socket.to(data.id).emit("typing", {
+      id: socket.user._id,
+      isTyping: data.isTyping,
+    });
+  });
+
+  /**
    * Listen for disconnect event
    * @listens disconnect
    * @description When a user disconnects, the user is removed from the online users list

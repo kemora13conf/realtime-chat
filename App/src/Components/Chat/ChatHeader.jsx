@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import SocketContext from "../../Context/LoadSocket.js";
 import { Link } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 export const USER_STATUS = {
   ONLINE: "online",
@@ -11,6 +11,7 @@ export const USER_STATUS = {
 
 const ChatHeader = ({ user }) => {
   const [userStatus, setUserStatus] = useState(USER_STATUS.OFFLINE);
+  const [isTyping, setIsTyping] = useState(false);
 
   const checkUserStatus = () => {
     fetch(`${import.meta.env.VITE_API}/users/${user?._id}/status`, {
@@ -44,10 +45,20 @@ const ChatHeader = ({ user }) => {
   const onConnect = () => {
     SocketContext.socket.on("new-user-connected", onNewUserConnected);
     SocketContext.socket.on("user-disconnected", onUserDisconnected);
+    SocketContext.socket.on("typing", (data) => {
+      if (data.id == user._id) {
+        if (data.isTyping) {
+          setIsTyping(true);
+        } else {
+          setIsTyping(false);
+        }
+      }
+    });
   };
   const onDisconnect = () => {
     SocketContext.socket.off("new-user-connected", onNewUserConnected);
     SocketContext.socket.off("user-disconnected", onUserDisconnected);
+    SocketContext.socket.off("typing");
   };
 
   useEffect(() => {
@@ -87,10 +98,43 @@ const ChatHeader = ({ user }) => {
           {user.username}
         </div>
         <div className="font-light text-quaternary-700 text-xs font-['Montserrat']">
-          {/* last seen */}
-          {userStatus == USER_STATUS.ONLINE
-            ? USER_STATUS.ONLINE
-            : `Last seen ${new Date(user.last_seen).toLocaleTimeString()}`}
+          <AnimatePresence mode="wait">
+            {isTyping ? (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className="text-green-500"
+              >
+                Typing...
+              </motion.span>
+            ) : userStatus == USER_STATUS.ONLINE ? (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className={`${
+                  userStatus == USER_STATUS.ONLINE ? "text-green-500" : ""
+                }`}
+              >
+                {USER_STATUS.ONLINE}
+              </motion.span>
+            ) : (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className={`${
+                  userStatus == USER_STATUS.ONLINE ? "text-green-500" : ""
+                }`}
+              >
+                Last seen {new Date(user.last_seen).toLocaleTimeString()}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
