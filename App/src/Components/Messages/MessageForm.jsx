@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Cookies from "js-cookie";
-import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AnimatePresence } from "framer-motion";
 import ImageModal from "./Modals/imageModal.jsx";
 import FilesModal from "./Modals/FilesModal.jsx";
+import SocketContext from "./../../Context/LoadSocket";
 
 export default function MessageForm({ AddMessage, user }) {
   const inputRef = useRef(null);
@@ -60,6 +60,14 @@ export default function MessageForm({ AddMessage, user }) {
      * if the message input is focused i need to emit a typing event
      * if the message input is not focused i need to emit a stop typing event
      */
+    if(inputRef.current) {
+      inputRef.current.addEventListener("focus", () => {
+        SocketContext.socket.emit("typing", { id: user._id, isTyping: true });
+      });
+      inputRef.current.addEventListener("blur", () => {
+        SocketContext.socket.emit("typing", { id: user._id, isTyping: false });
+      });
+    }
   }, []);
   return (
     <div className="w-full flex mt-auto p-[10px] gap-[10px] bg-secondary-800 rounded-b-[20px] relative">
@@ -114,7 +122,6 @@ export default function MessageForm({ AddMessage, user }) {
             accept="image/*"
             onChange={importImage}
             id="image"
-
             disabled={isFilesModalOpen || isImageModalOpen}
           />
         </label>
