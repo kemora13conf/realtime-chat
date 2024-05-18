@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import EmptyChat from "./Pages/EmptyChat.jsx";
 import Chat from "./Pages/Chat.jsx";
 import Profile from "./Pages/Profile.jsx";
+import Call from "./Pages/Call.jsx";
 
 function App() {
   return (
@@ -31,11 +32,14 @@ function App() {
 
                 <Route key={"home-key"} element={<Home />}>
                   <Route key={"emty-chat-key"} index element={<EmptyChat />} />
-                  <Route
-                    key={"chat-key"}
-                    path="conversation/:id"
-                    element={<Chat />}
-                  />
+                  <Route key={"chat-key"} path="conversation/:id/">
+                    <Route key={"chat-index-key"} index element={<Chat />} />
+                    <Route
+                      key={"chat-call-key"}
+                      path="call"
+                      element={<Call />}
+                    />
+                  </Route>
                   <Route
                     key={"profile-key"}
                     path="profile"
