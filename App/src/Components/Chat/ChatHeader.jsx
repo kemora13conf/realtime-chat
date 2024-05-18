@@ -137,6 +137,17 @@ const ChatHeader = ({ user }) => {
           </AnimatePresence>
         </div>
       </div>
+      {/* call button */}
+      <Link
+        to="call"
+        className="w-[40px] h-[40px] rounded-full ml-auto
+        flex items-center justify-center transition-all duration-300 ease-in-out
+        bg-secondary-700 hover:bg-secondary-600 hover:scale-110 
+        border border-secondary-600 hover:border-secondary-500
+        "
+      >
+        <i className="fas fa-phone text-quaternary-600 text-xl" />
+      </Link>
     </div>
   );
 };
